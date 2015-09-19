@@ -9,30 +9,32 @@ import android.widget.ImageView;
 import java.io.InputStream;
 
 /**
- * Created by Kirsten on 19.09.2015.
+ * Downloads and sets album art to an ImageView.
  */
 public class DownloadAlbumArtTask extends AsyncTask<String, Void, Bitmap> {
-    ImageView bmImage;
 
-    public DownloadAlbumArtTask(ImageView bmImage) {
-        this.bmImage = bmImage;
+    private static final String TAG = "DownloadAlbumArt";
+
+    private ImageView albumImage;
+
+    public DownloadAlbumArtTask(ImageView albumImage) {
+        this.albumImage = albumImage;
     }
 
     protected Bitmap doInBackground(String... urls) {
         String urldisplay = urls[0];
-        Bitmap mIcon11 = null;
+        Bitmap albumBmp = null;
         try {
             InputStream in = new java.net.URL(urldisplay).openStream();
-            mIcon11 = BitmapFactory.decodeStream(in);
+            albumBmp = BitmapFactory.decodeStream(in);
         } catch (Exception e) {
-            Log.e("Error", e.getMessage());
-            e.printStackTrace();
+            Log.e(TAG, "Unable to download album art");
         }
-        return mIcon11;
+        return albumBmp;
     }
 
     protected void onPostExecute(Bitmap result) {
-        Bitmap resizedResult = Bitmap.createScaledBitmap(result, bmImage.getHeight(), bmImage.getHeight(), false);
-        bmImage.setImageBitmap(resizedResult);
+        Bitmap resizedResult = Bitmap.createScaledBitmap(result, albumImage.getHeight(), albumImage.getHeight(), false);
+        albumImage.setImageBitmap(resizedResult);
     }
 }

@@ -8,21 +8,27 @@ import java.io.IOException;
 import java.io.InputStream;
 
 /**
- * Created by Kirsten on 19.09.2015.
+ * Loads and stores configuration data.
  */
 public class Config {
 
+    private final static String TAG = "Config";
     private final static String CONFIG_FILENAME = "smartplaylistmanager.config";
-    public final String CLIENT_ID;
-    public final String REDIRECT_URI;
-    public final int REQUEST_CODE;
+    public final String clientId;
+    public final String redirectUri;
+    public final int requestCode;
 
-    public Config(String clientId, String redirectURI, int requestCode) {
-        CLIENT_ID = clientId;
-        REDIRECT_URI = redirectURI;
-        REQUEST_CODE = requestCode;
+    private Config(String clientId, String redirectUri, int requestCode) {
+        this.clientId = clientId;
+        this.redirectUri = redirectUri;
+        this.requestCode = requestCode;
     }
 
+    /**
+     * Attempt to load config file and retrieve authentication data.
+     * @param context Context for accessing asset folder
+     * @return Initialized Config object
+     */
     public static Config loadConfig(Context context) {
         String clientId = "";
         String redirectURI = "";
@@ -39,12 +45,12 @@ public class Config {
                 data = stream.read();
             }
             String[] parsed = contents.trim().split("\\n");
-            Log.d("Loaded client id", parsed[0]);
-            Log.d("Loaded redirect uri", parsed[1]);
-            Log.d("Loaded request code", parsed[2]);
             clientId = parsed[0];
+            Log.d(TAG, "Loaded client id: " + parsed[0]);
             redirectURI = parsed[1];
+            Log.d(TAG, "Loaded redirect uri: " + parsed[1]);
             requestCode = Integer.valueOf(parsed[2]);
+            Log.d(TAG, "Loaded request code: " + parsed[2]);
         } catch (IOException ioe) {
             Log.e("Configuration failed", "Unable to read config file");
             ioe.printStackTrace();

@@ -5,21 +5,23 @@ import android.content.Intent;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.Bundle;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.Transformation;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 
 import com.spotify.sdk.android.authentication.AuthenticationClient;
 import com.spotify.sdk.android.authentication.AuthenticationRequest;
 import com.spotify.sdk.android.authentication.AuthenticationResponse;
 import com.spotify.sdk.android.player.ConnectionStateCallback;
-import com.spotify.sdk.android.player.PlayerNotificationCallback;
-import com.spotify.sdk.android.player.PlayerState;
 
 import kaaes.spotify.webapi.android.SpotifyApi;
 import kaaes.spotify.webapi.android.SpotifyService;
@@ -28,14 +30,20 @@ import kaaes.spotify.webapi.android.SpotifyService;
  * Screen for displaying list of user's saved tracks.
  */
 public class TrackListActivity extends Activity implements
-        PlayerNotificationCallback, ConnectionStateCallback {
+        ConnectionStateCallback {
 
     // Configuration loader
     private Config config;
 
     // Layout & view managers
     private RecyclerView recycler;
-    private RecyclerView.LayoutManager recyclerLayoutManager;
+
+    // Layout size constants
+    public static final int
+            LL_MIN_DP = 120,
+            LL_MAX_DP = 296,
+            CARD_MIN_DP = 108,
+            CARD_MAX_DP = 280;
 
     // Loading bar
     private ProgressBar progressBar;
@@ -58,14 +66,14 @@ public class TrackListActivity extends Activity implements
         AuthenticationRequest.Builder builder = new AuthenticationRequest.Builder(config.clientId,
                 AuthenticationResponse.Type.TOKEN,
                 config.redirectUri);
-        builder.setScopes(new String[]{"user-read-private", "streaming", "user-library-read"});
+        builder.setScopes(new String[]{"user-read-private", "user-library-read"});
         AuthenticationRequest request = builder.build();
-        AuthenticationClient.openLoginActivity(this, config.requestCode, request);
+        AuthenticationClient.openLoginActivity(this, config.authRequestCode, request);
 
         // Set up views
         recycler = (RecyclerView) findViewById(R.id.recycler_track_list);
         recycler.setHasFixedSize(true);
-        recyclerLayoutManager = new LinearLayoutManager(this);
+        RecyclerView.LayoutManager recyclerLayoutManager = new LinearLayoutManager(this);
         recycler.setLayoutManager(recyclerLayoutManager);
         progressBar = (ProgressBar) findViewById(R.id.progress_bar);
 
@@ -79,8 +87,7 @@ public class TrackListActivity extends Activity implements
     protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
         super.onActivityResult(requestCode, resultCode, intent);
 
-        // Check if result comes from the correct activity
-        if (requestCode == config.requestCode) {
+        if (requestCode == config.authRequestCode) {
             AuthenticationResponse response = AuthenticationClient.getResponse(resultCode, intent);
             if (response.getType() == AuthenticationResponse.Type.TOKEN) {
                 // Initialize spotify service
@@ -118,16 +125,6 @@ public class TrackListActivity extends Activity implements
     @Override
     public void onConnectionMessage(String message) {
         Log.d("MainActivity", "Received connection message: " + message);
-    }
-
-    @Override
-    public void onPlaybackEvent(EventType eventType, PlayerState playerState) {
-        Log.d("MainActivity", "Playback event received: " + eventType.name());
-    }
-
-    @Override
-    public void onPlaybackError(PlayerNotificationCallback.ErrorType errorType, String errorDetails) {
-        Log.d("MainActivity", "Playback error received: " + errorType.name());
     }
 
     @Override
@@ -169,7 +166,7 @@ public class TrackListActivity extends Activity implements
             player.reset();
             playbackButton.setImageResource(R.drawable.play_circle);
 
-            if (playbackTrack.equals((String) view.getTag())) {
+            if (playbackTrack.equals(view.getTag())) {
                 playbackTrack = "";
                 playbackButton = null;
                 playback = false;
@@ -191,4 +188,51 @@ public class TrackListActivity extends Activity implements
             Log.d("Playback", "Unable to play track " + e.getMessage());
         }
     }
+
+    public void toggleExpandCard(final View view) {
+        final LinearLayout ll = (LinearLayout) view;
+        final CardView cv = (CardView) ll.findViewById(R.id.cv);
+
+        Animation a;
+        if(ll.getTag().equals(R.string.tag_contracted)) {
+            // expand card
+            a = new Animation() {
+                @Override
+                protected void applyTransformation(float interpolatedTime, Transformation t) {
+                    ll.getLayoutParams().height = (int) (LL_MIN_DP + ((LL_MAX_DP-LL_MIN_DP) * interpolatedTime));
+                    cv.getLayoutParams().height = (int) (CARD_MIN_DP + ((CARD_MAX_DP-CARD_MIN_DP) * interpolatedTime));
+                    ll.requestLayout();
+                    cv.requestLayout();
+                }
+
+                @Override
+                public boolean willChangeBounds() {
+                    return true;
+                }
+            };
+            ll.setTag(R.string.tag_expanded);
+        } else {
+            // contract card
+            a = new Animation() {
+                @Override
+                protected void applyTransformation(float interpolatedTime, Transformation t) {
+                    ll.getLayoutParams().height = (int) (LL_MAX_DP + ((LL_MIN_DP-LL_MAX_DP) * interpolatedTime));
+                    cv.getLayoutParams().height = (int) (CARD_MAX_DP + ((CARD_MIN_DP-CARD_MAX_DP) * interpolatedTime));
+                    ll.requestLayout();
+                    cv.requestLayout();
+                }
+
+                @Override
+                public boolean willChangeBounds() {
+                    return true;
+                }
+            };
+            ll.setTag(R.string.tag_contracted);
+        }
+
+        a.setDuration(1000);
+        view.startAnimation(a);
+
+    }
+
 }

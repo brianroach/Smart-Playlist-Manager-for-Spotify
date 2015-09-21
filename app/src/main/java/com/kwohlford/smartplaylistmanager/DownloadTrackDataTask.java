@@ -71,7 +71,9 @@ public class DownloadTrackDataTask extends AsyncTask<SpotifyService, Void, Track
                             track.artists.get(0).name,
                             track.album.name,
                             track.preview_url,
-                            track.album.images.get(0).url
+                            track.album.images.get(0).url,
+                            2,
+                            new ArrayList<Tag>()
                     )
             );
         }

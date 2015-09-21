@@ -5,4 +5,13 @@
     <string name="action_settings">Settings</string>
     <string name="desc_albumart">Album art</string>
     <string name="desc_playpreview">Play preview track</string>
+    <string name="desc_tags">Tags</string>
+    <string name="placeholder_songtitle">Song Title</string>
+    <string name="placeholder_artist">Artist</string>
+    <string name="placeholder_album">Album</string>
+    <string name="placeholder_taglist">Tag list</string>
+    <string name="button_editgenre">EDIT GENRE</string>
+    <string name="button_editmood">EDIT MOOD</string>
+    <string name="tag_expanded">expanded</string>
+    <string name="tag_contracted">contracted</string>
 </resources>

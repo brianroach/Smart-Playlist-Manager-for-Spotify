@@ -16,12 +16,12 @@ public class Config {
     private final static String CONFIG_FILENAME = "smartplaylistmanager.config";
     public final String clientId;
     public final String redirectUri;
-    public final int requestCode;
+    public final int authRequestCode;
 
-    private Config(String clientId, String redirectUri, int requestCode) {
+    private Config(String clientId, String redirectUri, int authRequestCode) {
         this.clientId = clientId;
         this.redirectUri = redirectUri;
-        this.requestCode = requestCode;
+        this.authRequestCode = authRequestCode;
     }
 
     /**

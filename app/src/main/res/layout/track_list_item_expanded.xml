@@ -5,6 +5,10 @@
     android:layout_width="match_parent"
     android:layout_height="120dp"
     android:padding="6dp"
+    android:id="@+id/ll"
+    android:clickable="true"
+    android:onClick="toggleExpandCard"
+    android:tag="@string/tag_contracted"
     >
 
     <android.support.v7.widget.CardView
@@ -15,7 +19,7 @@
 
         <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="108dp"
+            android:layout_height="match_parent"
             >
 
             <ImageView
@@ -31,14 +35,15 @@
 
             <ImageView
                 android:layout_width="54dp"
-                android:layout_height="match_parent"
+                android:layout_height="108dp"
                 android:id="@+id/playback_button"
                 android:layout_alignParentEnd="true"
                 android:layout_alignParentTop="true"
                 android:src="@drawable/play_circle"
                 android:contentDescription="@string/desc_playpreview"
                 android:clickable="true"
-                android:onClick="togglePlaybackPreview" />
+                android:onClick="togglePlaybackPreview"
+                />
 
             <TextView
                 android:layout_width="wrap_content"
@@ -67,6 +72,62 @@
                 android:layout_toEndOf="@+id/album_thumbnail"
                 android:layout_below="@+id/artist"
                 android:text="@string/placeholder_album"
+                />
+
+            <ImageView
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:id="@+id/imgTag"
+                android:layout_below="@+id/album_thumbnail"
+                android:layout_alignParentStart="true"
+                android:src="@drawable/tag_outline"
+                android:contentDescription="@string/desc_tags"
+                />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:text="@string/placeholder_taglist"
+                android:id="@+id/txtTags"
+                android:textAlignment="center"
+                android:layout_below="@+id/album_thumbnail"
+                android:layout_toEndOf="@+id/imgTag"
+                android:layout_above="@+id/songRating"
+                />
+
+            <RatingBar
+                android:layout_width="wrap_content"
+                android:layout_height="50dp"
+                android:id="@+id/songRating"
+                android:numStars="5"
+                android:layout_below="@+id/imgTag"
+                android:layout_centerHorizontal="true"
+                />
+
+            <Space
+                android:layout_width="match_parent"
+                android:layout_height="10dp"
+                android:layout_below="@+id/songRating"
+                android:id="@+id/space"
+                />
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/button_editgenre"
+                android:id="@+id/button"
+                android:layout_below="@+id/space"
+                android:layout_alignStart="@+id/songRating"
+                />
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/button_editmood"
+                android:id="@+id/button2"
+                android:layout_below="@+id/space"
+                android:layout_alignEnd="@+id/songRating"
                 />
 
         </RelativeLayout>

@@ -10,8 +10,6 @@ import android.widget.LinearLayout;
 import android.widget.RatingBar;
 import android.widget.TextView;
 
-import java.util.List;
-
 /**
  * RecyclerView adapter for saved track list.
  */
@@ -31,7 +29,8 @@ public class TrackListAdapter extends RecyclerView.Adapter<TrackListAdapter.View
         private ImageView albumThumbnail;
         private ImageView playbackButton;
         private RatingBar songRating;
-        private TextView tagsList;
+        private TextView genreTags;
+        private TextView moodTags;
 
         protected ViewHolder(View v) {
             super(v);
@@ -43,7 +42,8 @@ public class TrackListAdapter extends RecyclerView.Adapter<TrackListAdapter.View
             albumThumbnail = (ImageView) itemView.findViewById(R.id.album_thumbnail);
             playbackButton = (ImageView) itemView.findViewById(R.id.playback_button);
             songRating = (RatingBar) itemView.findViewById(R.id.songRating);
-            tagsList = (TextView) itemView.findViewById(R.id.txtTags);
+            genreTags = (TextView) itemView.findViewById(R.id.genreTags);
+            moodTags = (TextView) itemView.findViewById(R.id.moodTags);
         }
     }
 
@@ -61,18 +61,35 @@ public class TrackListAdapter extends RecyclerView.Adapter<TrackListAdapter.View
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
         // Replace the contents of a view (invoked by the layout manager)
-        TrackData track = trackDataset.get(position);
+
+        final TrackData track = trackDataset.get(position);
+
+        // set up layout containers
+        holder.ll.getLayoutParams().height = TrackListActivity.LL_MIN_DP;
+        holder.cv.getLayoutParams().height = TrackListActivity.CARD_MIN_DP;
+        holder.ll.setTag(R.string.tag_collapsed);
+        holder.cv.setTag(track.uri);
+
+        // set text views
         holder.songTitle.setText(track.songTitle);
         holder.artist.setText(track.artist);
         holder.albumName.setText(track.albumName);
-        holder.playbackButton.setTag(track.previewUrl);
-        holder.tagsList.setText(track.getTagsAsString());
+        holder.genreTags.setText(track.getTagsAsString(Tag.TagType.GENRE));
+        holder.moodTags.setText(track.getTagsAsString(Tag.TagType.MOOD));
+
+        // set rating
         holder.songRating.setRating(track.getRating());
+        holder.songRating.setOnRatingBarChangeListener(new RatingBar.OnRatingBarChangeListener() {
+            @Override
+            public void onRatingChanged(RatingBar ratingBar, float rating, boolean fromUser) {
+                if (fromUser) track.setRating(rating);
+            }
+        });
+
+        // set images
+        holder.playbackButton.setImageResource(track.previewPlaying ? R.drawable.pause_circle : R.drawable.play_circle);
         holder.albumThumbnail.setImageResource(R.drawable.album_placeholder);
         new DownloadAlbumArtTask(holder.albumThumbnail).execute(track.albumArtUrl);
-        holder.ll.getLayoutParams().height = TrackListActivity.LL_MIN_DP;
-        holder.ll.setTag(R.string.tag_contracted);
-        holder.cv.getLayoutParams().height = TrackListActivity.CARD_MIN_DP;
     }
 
     @Override

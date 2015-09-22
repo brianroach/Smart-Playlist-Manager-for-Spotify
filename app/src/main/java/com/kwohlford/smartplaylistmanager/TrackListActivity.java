@@ -1,6 +1,8 @@
 package com.kwohlford.smartplaylistmanager;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
@@ -17,11 +19,14 @@ import android.view.animation.Transformation;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import com.spotify.sdk.android.authentication.AuthenticationClient;
 import com.spotify.sdk.android.authentication.AuthenticationRequest;
 import com.spotify.sdk.android.authentication.AuthenticationResponse;
 import com.spotify.sdk.android.player.ConnectionStateCallback;
+
+import java.util.HashMap;
 
 import kaaes.spotify.webapi.android.SpotifyApi;
 import kaaes.spotify.webapi.android.SpotifyService;
@@ -37,6 +42,7 @@ public class TrackListActivity extends Activity implements
 
     // Layout & view managers
     private RecyclerView recycler;
+    private TrackListAdapter recyclerAdapter;
 
     // Layout size constants
     public static final int
@@ -46,13 +52,16 @@ public class TrackListActivity extends Activity implements
             CARD_MAX_DP = 280;
 
     // Loading bar
-    private ProgressBar progressBar;
+    protected ProgressBar progressBar;
 
     // Vars for tracking playback of preview clips
     private boolean playback;
     private ImageView playbackButton;
     private MediaPlayer player;
     private String playbackTrack;
+
+    // Track list
+    public TrackListing tracks;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -97,7 +106,7 @@ public class TrackListActivity extends Activity implements
 
                 // Start loading track data
                 progressBar.setVisibility(View.VISIBLE);
-                new DownloadTrackDataTask(recycler, progressBar).execute(spotify);
+                new DownloadTrackDataTask(this).execute(spotify);
             }
         }
     }
@@ -135,7 +144,6 @@ public class TrackListActivity extends Activity implements
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
     }
@@ -160,13 +168,15 @@ public class TrackListActivity extends Activity implements
      * @param view View
      */
     public void togglePlaybackPreview(View view) {
+        CardView card = (CardView) view.getParent().getParent();
         if(playback) {
             // Stop current track playback
             player.stop();
             player.reset();
             playbackButton.setImageResource(R.drawable.play_circle);
+            tracks.getTrackForUri(playbackTrack).previewPlaying = false;
 
-            if (playbackTrack.equals(view.getTag())) {
+            if (playbackTrack.equals(card.getTag())) {
                 playbackTrack = "";
                 playbackButton = null;
                 playback = false;
@@ -176,25 +186,30 @@ public class TrackListActivity extends Activity implements
 
         // Load and play new track
         try {
-            playbackTrack = (String) view.getTag();
             Log.d("Playback", "Loading track " + playbackTrack);
-            player.setDataSource(playbackTrack);
+            playbackTrack = (String) card.getTag();
+            player.setDataSource(tracks.getTrackForUri(playbackTrack).previewUrl);
             player.prepare();
             player.start();
             playbackButton = (ImageView) view;
             playbackButton.setImageResource(R.drawable.pause_circle);
+            tracks.getTrackForUri(playbackTrack).previewPlaying = true;
             playback = true;
         } catch (Exception e) {
             Log.d("Playback", "Unable to play track " + e.getMessage());
         }
     }
 
+    /**
+     * Expands or collapses card to display/hide additional info.
+     * @param view Layout wrapper containing card
+     */
     public void toggleExpandCard(final View view) {
         final LinearLayout ll = (LinearLayout) view;
         final CardView cv = (CardView) ll.findViewById(R.id.cv);
 
         Animation a;
-        if(ll.getTag().equals(R.string.tag_contracted)) {
+        if(ll.getTag().equals(R.string.tag_collapsed)) {
             // expand card
             a = new Animation() {
                 @Override
@@ -212,7 +227,7 @@ public class TrackListActivity extends Activity implements
             };
             ll.setTag(R.string.tag_expanded);
         } else {
-            // contract card
+            // collapse card
             a = new Animation() {
                 @Override
                 protected void applyTransformation(float interpolatedTime, Transformation t) {
@@ -227,12 +242,99 @@ public class TrackListActivity extends Activity implements
                     return true;
                 }
             };
-            ll.setTag(R.string.tag_contracted);
+            ll.setTag(R.string.tag_collapsed);
         }
 
-        a.setDuration(1000);
+        a.setDuration(500);
         view.startAnimation(a);
+    }
 
+    /**
+     * @param adapter RecyclerView adapter for track listing
+     */
+    public void setRecyclerAdapter(TrackListAdapter adapter) {
+        recycler.setAdapter(adapter);
+        recyclerAdapter = adapter;
+    }
+
+    /**
+     * Opens a new genre tag selector dialog.
+     * @param view Button pressed
+     */
+    public void openGenreDialog(View view) {
+        CardView card = (CardView) view.getParent().getParent().getParent();
+        createTagDialog(
+                "Select Genre(s)",
+                tracks.getTrackForUri((String) card.getTag()),
+                Tag.TagType.GENRE,
+                (TextView) card.findViewById(R.id.genreTags)
+        ).show();
+    }
+
+    /**
+     * Opens a new mood tag selector dialog.
+     * @param view Button pressed
+     */
+    public void openMoodDialog(View view) {
+        CardView card = (CardView) view.getParent().getParent().getParent();
+        createTagDialog(
+                "Select Mood(s)",
+                tracks.getTrackForUri((String) card.getTag()),
+                Tag.TagType.MOOD,
+                (TextView) card.findViewById(R.id.moodTags)
+        ).show();
+    }
+
+    /**
+     * Creates a checkbox dialog for selecting tags.
+     * @param title Title of dialog
+     * @param track Track being edited
+     * @param type Tag type
+     * @param txtTags Text view to update with new tags
+     * @return New tag selector dialog
+     */
+    private AlertDialog createTagDialog(
+            String title,
+            final TrackData track,
+            final Tag.TagType type,
+            final TextView txtTags) {;
+        final HashMap<Tag, Boolean> truthMapping = track.getTags(type);
+        final CharSequence[] values = new CharSequence[truthMapping.keySet().size()];
+        final boolean[] state = new boolean[truthMapping.keySet().size()];
+        int i = 0;
+        for(Tag tag : truthMapping.keySet()) {
+            values[i] = tag.name;
+            state[i] = truthMapping.get(tag);
+            Log.d("Loading tag", (String) values[i] + state[i]);
+            i++;
+        }
+
+        return new AlertDialog.Builder(this)
+                .setTitle(title)
+                .setMultiChoiceItems(values, state, new DialogInterface.OnMultiChoiceClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int index, boolean isChecked) {
+                        state[index] = isChecked;
+                    }
+                })
+                .setPositiveButton("Save", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int index) {
+                        for (int i = 0; i < truthMapping.keySet().size(); i++) {
+                            Log.d("Setting tag", (String) values[i] + state[i]);
+                            truthMapping.put(new Tag((String) values[i], type), state[i]);
+                        }
+                        dialog.dismiss();
+                        txtTags.setText(track.getTagsAsString(type));
+                    }
+                })
+                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int id) {
+                        dialog.dismiss();
+                    }
+                })
+                .create();
     }
 
 }

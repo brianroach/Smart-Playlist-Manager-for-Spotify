@@ -1,10 +1,8 @@
 package com.kwohlford.smartplaylistmanager;
 
 import android.os.AsyncTask;
-import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
-import android.widget.ProgressBar;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -23,18 +21,18 @@ public class DownloadTrackDataTask extends AsyncTask<SpotifyService, Void, Track
     private static final int TRACKS_PER_PAGE = 50;
     private static final String OPTIONS_LIMIT = "limit";
     private static final String OPTIONS_OFFSET = "offset";
-    private RecyclerView recycler;
-    private ProgressBar progressBar;
+    private TrackListActivity trackListScreen;
+    private HashMap<Tag, Boolean> genreTags;
+    private HashMap<Tag, Boolean> moodTags;
 
-    public DownloadTrackDataTask(RecyclerView recycler, ProgressBar progressBar) {
-        this.progressBar = progressBar;
-        this.recycler = recycler;
+    public DownloadTrackDataTask(TrackListActivity trackListScreen) {
+        this.trackListScreen = trackListScreen;
     }
 
     @Override
     protected TrackListing doInBackground(SpotifyService... services) {
         SpotifyService spotify = services[0];
-        ArrayList<TrackData> tracks = new ArrayList<>();
+        HashMap<String,TrackData> tracks = new HashMap<>();
 
         int offset = 0;
         HashMap<String, Object> params = new HashMap<>();
@@ -42,42 +40,86 @@ public class DownloadTrackDataTask extends AsyncTask<SpotifyService, Void, Track
         params.put(OPTIONS_OFFSET, offset);
         Pager<SavedTrack> savedTrackPager = spotify.getMySavedTracks(params);
 
-//        tracks.addAll(extractTracksFromPage(savedTrackPager));
+//        tracks.putAll(extractTracksFromPage(savedTrackPager));
 
         while(savedTrackPager.next != null) {
             Log.d(TAG, "Retrieved " + savedTrackPager.items.size() + " saved tracks");
-            tracks.addAll(extractTracksFromPage(savedTrackPager));
+            tracks.putAll(extractTracksFromPage(savedTrackPager));
             offset += TRACKS_PER_PAGE;
             params.put(OPTIONS_OFFSET, offset);
             savedTrackPager = spotify.getMySavedTracks(params);
         }
 
-        return new TrackListing(tracks);
+        return new TrackListing(
+                tracks,
+                new ArrayList<>(loadGenreTags().keySet()),
+                new ArrayList<>(loadMoodTags().keySet()));
     }
 
     protected void onPostExecute(TrackListing result) {
-        RecyclerView.Adapter mAdapter = new TrackListAdapter(result);
-        recycler.setAdapter(mAdapter);
-        progressBar.setVisibility(View.GONE);
+        TrackListAdapter mAdapter = new TrackListAdapter(result);
+        trackListScreen.setRecyclerAdapter(mAdapter);
+        trackListScreen.progressBar.setVisibility(View.GONE);
+        trackListScreen.tracks = result;
     }
 
-    private ArrayList<TrackData> extractTracksFromPage(Pager<SavedTrack> page) {
-        ArrayList<TrackData> tracks = new ArrayList<>();
+    /**
+     * Extracts all necessary track data from a page of tracks.
+     * @param page Current page
+     * @return Mapping of track uris to their metadata
+     */
+    private HashMap<String,TrackData> extractTracksFromPage(Pager<SavedTrack> page) {
+        HashMap<String,TrackData> trackMap = new HashMap<>();
         for(SavedTrack savedTrack : page.items) {
             Track track = savedTrack.track;
-            tracks.add(
+            HashMap<Tag, Boolean> genres = loadGenreTags();
+            HashMap<Tag, Boolean> moods = loadMoodTags();
+
+            trackMap.put(track.uri,
                     new TrackData(
+                            track.uri,
                             track.name,
                             track.artists.get(0).name,
                             track.album.name,
                             track.preview_url,
                             track.album.images.get(0).url,
                             2,
-                            new ArrayList<Tag>()
+                            genres,
+                            moods
                     )
             );
         }
-        return tracks;
+        return trackMap;
+    }
+
+    /**
+     * Loads all available genre tags.
+     * @return Mapping of tags to their set value (false by default)
+     */
+    public HashMap<Tag, Boolean> loadGenreTags() {
+        // default placeholder code
+        if(genreTags == null) {
+            genreTags = new HashMap<>();
+            genreTags.put(new Tag("Indie", Tag.TagType.GENRE), false);
+            genreTags.put(new Tag("Electronic", Tag.TagType.GENRE), false);
+            genreTags.put(new Tag("Other", Tag.TagType.GENRE), false);
+        }
+        return genreTags;
+    }
+
+    /**
+     * Loads all available mood tags.
+     * @return Mapping of tags to their set value (false by default)
+     */
+    public HashMap<Tag, Boolean> loadMoodTags() {
+        // default placeholder code
+        if(moodTags == null) {
+            moodTags = new HashMap<>();
+            moodTags.put(new Tag("Chill", Tag.TagType.MOOD), false);
+            moodTags.put(new Tag("Upbeat", Tag.TagType.MOOD), false);
+            moodTags.put(new Tag("Rainy day", Tag.TagType.MOOD), false);
+        }
+        return moodTags;
     }
 
 }

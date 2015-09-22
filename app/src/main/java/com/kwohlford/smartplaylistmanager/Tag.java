@@ -1,14 +1,41 @@
 package com.kwohlford.smartplaylistmanager;
 
 /**
- * Created by Kirsten on 21.09.2015.
+ * Container for storing tags and related information.
  */
 public class Tag {
 
     public String name;
+    public TagType type;
 
-    public Tag(String name) {
-        this.name = name;
+    /* Possible tag categories */
+    public enum TagType {
+        MOOD, GENRE
     }
 
+    public Tag(String name, TagType type) {
+        this.name = name;
+        this.type = type;
+    }
+
+    @Override
+    public int hashCode() {
+        return type.hashCode() + name.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof Tag))
+            return false;
+        if (obj == this)
+            return true;
+
+        Tag t = (Tag) obj;
+        return type.equals(t.type) && name.equals(t.name);
+    }
+
+    @Override
+    public String toString() {
+        return name;
+    }
 }

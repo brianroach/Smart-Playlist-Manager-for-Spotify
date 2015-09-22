@@ -10,8 +10,8 @@
     <string name="placeholder_artist">Artist</string>
     <string name="placeholder_album">Album</string>
     <string name="placeholder_taglist">Tag list</string>
-    <string name="button_editgenre">EDIT GENRE</string>
-    <string name="button_editmood">EDIT MOOD</string>
+    <string name="button_editgenre">EDIT GENRE TAGS</string>
+    <string name="button_editmood">EDIT MOOD TAGS</string>
     <string name="tag_expanded">expanded</string>
-    <string name="tag_contracted">contracted</string>
+    <string name="tag_collapsed">collapsed</string>
 </resources>

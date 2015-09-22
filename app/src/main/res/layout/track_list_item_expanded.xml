@@ -3,17 +3,17 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="120dp"
+    android:layout_height="296dp"
     android:padding="6dp"
     android:id="@+id/ll"
     android:clickable="true"
     android:onClick="toggleExpandCard"
-    android:tag="@string/tag_contracted"
+    android:tag="@string/tag_collapsed"
     >
 
     <android.support.v7.widget.CardView
         android:layout_width="match_parent"
-        android:layout_height="108dp"
+        android:layout_height="280dp"
         android:id="@+id/cv"
         >
 
@@ -74,14 +74,22 @@
                 android:text="@string/placeholder_album"
                 />
 
+            <Space
+                android:layout_width="match_parent"
+                android:layout_height="10dp"
+                android:id="@+id/spacer1"
+                android:layout_below="@+id/album_thumbnail"
+                android:layout_alignParentStart="true" />
+
             <ImageView
                 android:layout_width="50dp"
                 android:layout_height="50dp"
                 android:id="@+id/imgTag"
-                android:layout_below="@+id/album_thumbnail"
+                android:layout_below="@+id/spacer1"
                 android:layout_alignParentStart="true"
                 android:src="@drawable/tag_outline"
                 android:contentDescription="@string/desc_tags"
+                android:layout_marginStart="10dp"
                 />
 
             <TextView
@@ -89,11 +97,24 @@
                 android:layout_height="wrap_content"
                 android:textAppearance="?android:attr/textAppearanceMedium"
                 android:text="@string/placeholder_taglist"
-                android:id="@+id/txtTags"
-                android:textAlignment="center"
-                android:layout_below="@+id/album_thumbnail"
+                android:id="@+id/genreTags"
+                android:layout_below="@+id/spacer1"
+                android:layout_toEndOf="@+id/imgTag"
+                android:layout_marginStart="10dp"
+                android:layout_marginEnd="10dp"
+                />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:text="@string/placeholder_taglist"
+                android:id="@+id/moodTags"
+                android:layout_below="@+id/genreTags"
                 android:layout_toEndOf="@+id/imgTag"
                 android:layout_above="@+id/songRating"
+                android:layout_marginStart="10dp"
+                android:layout_marginEnd="10dp"
                 />
 
             <RatingBar
@@ -109,26 +130,39 @@
                 android:layout_width="match_parent"
                 android:layout_height="10dp"
                 android:layout_below="@+id/songRating"
-                android:id="@+id/space"
-                />
+                android:id="@+id/space" />
 
-            <Button
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/button_editgenre"
-                android:id="@+id/button"
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
                 android:layout_below="@+id/space"
-                android:layout_alignStart="@+id/songRating"
-                />
+                android:layout_alignParentStart="true">
 
-            <Button
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/button_editmood"
-                android:id="@+id/button2"
-                android:layout_below="@+id/space"
-                android:layout_alignEnd="@+id/songRating"
-                />
+                <Button
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="match_parent"
+                    android:text="@string/button_editgenre"
+                    android:id="@+id/btnGenre"
+                    style="@android:style/Widget.Holo.Light.Button.Borderless.Small"
+                    android:textStyle="bold"
+                    android:background="@drawable/border_right"
+                    android:clickable="true"
+                    android:onClick="openGenreDialog" />
+
+                <Button
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="match_parent"
+                    android:text="@string/button_editmood"
+                    android:id="@+id/btnMood"
+                    style="@android:style/Widget.Holo.Light.Button.Borderless.Small"
+                    android:textStyle="bold"
+                    android:background="@drawable/border_left"
+                    android:clickable="true"
+                    android:onClick="openMoodDialog" />
+            </LinearLayout>
 
         </RelativeLayout>
 

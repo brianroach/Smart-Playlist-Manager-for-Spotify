@@ -4,7 +4,6 @@ import android.os.AsyncTask;
 import android.util.Log;
 import android.view.View;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 
 import kaaes.spotify.webapi.android.SpotifyService;
@@ -22,8 +21,6 @@ public class DownloadTrackDataTask extends AsyncTask<SpotifyService, Void, Track
     private static final String OPTIONS_LIMIT = "limit";
     private static final String OPTIONS_OFFSET = "offset";
     private TrackListActivity trackListScreen;
-    private HashMap<Tag, Boolean> genreTags;
-    private HashMap<Tag, Boolean> moodTags;
 
     public DownloadTrackDataTask(TrackListActivity trackListScreen) {
         this.trackListScreen = trackListScreen;
@@ -52,8 +49,8 @@ public class DownloadTrackDataTask extends AsyncTask<SpotifyService, Void, Track
 
         return new TrackListing(
                 tracks,
-                new ArrayList<>(loadGenreTags().keySet()),
-                new ArrayList<>(loadMoodTags().keySet()));
+                trackListScreen.database.getTagsByType(Tag.TagType.GENRE),
+                trackListScreen.database.getTagsByType(Tag.TagType.MOOD));
     }
 
     protected void onPostExecute(TrackListing result) {
@@ -72,8 +69,6 @@ public class DownloadTrackDataTask extends AsyncTask<SpotifyService, Void, Track
         HashMap<String,TrackData> trackMap = new HashMap<>();
         for(SavedTrack savedTrack : page.items) {
             Track track = savedTrack.track;
-            HashMap<Tag, Boolean> genres = loadGenreTags();
-            HashMap<Tag, Boolean> moods = loadMoodTags();
 
             trackMap.put(track.uri,
                     new TrackData(
@@ -83,43 +78,11 @@ public class DownloadTrackDataTask extends AsyncTask<SpotifyService, Void, Track
                             track.album.name,
                             track.preview_url,
                             track.album.images.get(0).url,
-                            2,
-                            genres,
-                            moods
+                            trackListScreen.database
                     )
             );
         }
         return trackMap;
-    }
-
-    /**
-     * Loads all available genre tags.
-     * @return Mapping of tags to their set value (false by default)
-     */
-    public HashMap<Tag, Boolean> loadGenreTags() {
-        // default placeholder code
-        if(genreTags == null) {
-            genreTags = new HashMap<>();
-            genreTags.put(new Tag("Indie", Tag.TagType.GENRE), false);
-            genreTags.put(new Tag("Electronic", Tag.TagType.GENRE), false);
-            genreTags.put(new Tag("Other", Tag.TagType.GENRE), false);
-        }
-        return genreTags;
-    }
-
-    /**
-     * Loads all available mood tags.
-     * @return Mapping of tags to their set value (false by default)
-     */
-    public HashMap<Tag, Boolean> loadMoodTags() {
-        // default placeholder code
-        if(moodTags == null) {
-            moodTags = new HashMap<>();
-            moodTags.put(new Tag("Chill", Tag.TagType.MOOD), false);
-            moodTags.put(new Tag("Upbeat", Tag.TagType.MOOD), false);
-            moodTags.put(new Tag("Rainy day", Tag.TagType.MOOD), false);
-        }
-        return moodTags;
     }
 
 }

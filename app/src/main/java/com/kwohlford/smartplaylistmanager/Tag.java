@@ -10,7 +10,9 @@ public class Tag {
 
     /* Possible tag categories */
     public enum TagType {
-        MOOD, GENRE
+        GENRE(1), MOOD(2);
+        public final int id;
+        TagType(int id) { this.id = id; }
     }
 
     public Tag(String name, TagType type) {

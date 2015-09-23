@@ -21,6 +21,7 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.kwohlford.smartplaylistmanager.db.SourceTrackData;
 import com.spotify.sdk.android.authentication.AuthenticationClient;
 import com.spotify.sdk.android.authentication.AuthenticationRequest;
 import com.spotify.sdk.android.authentication.AuthenticationResponse;
@@ -63,6 +64,9 @@ public class TrackListActivity extends Activity implements
     // Track list
     public TrackListing tracks;
 
+    // Database source
+    public SourceTrackData database;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -90,6 +94,10 @@ public class TrackListActivity extends Activity implements
         player = new MediaPlayer();
         player.setAudioStreamType(AudioManager.STREAM_MUSIC);
         playback = false;
+
+        // Open database
+        database = new SourceTrackData(this);
+        database.open();
     }
 
     @Override
@@ -109,6 +117,18 @@ public class TrackListActivity extends Activity implements
                 new DownloadTrackDataTask(this).execute(spotify);
             }
         }
+    }
+
+    @Override
+    protected void onResume() {
+        database.open();
+        super.onResume();
+    }
+
+    @Override
+    protected void onPause() {
+        database.close();
+        super.onPause();
     }
 
     @Override
@@ -297,7 +317,7 @@ public class TrackListActivity extends Activity implements
             String title,
             final TrackData track,
             final Tag.TagType type,
-            final TextView txtTags) {;
+            final TextView txtTags) {
         final HashMap<Tag, Boolean> truthMapping = track.getTags(type);
         final CharSequence[] values = new CharSequence[truthMapping.keySet().size()];
         final boolean[] state = new boolean[truthMapping.keySet().size()];
@@ -320,10 +340,12 @@ public class TrackListActivity extends Activity implements
                 .setPositiveButton("Save", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int index) {
-                        for (int i = 0; i < truthMapping.keySet().size(); i++) {
+                        HashMap<Tag, Boolean> tagMapping = new HashMap<>();
+                        for (int i = 0; i < values.length; i++) {
                             Log.d("Setting tag", (String) values[i] + state[i]);
-                            truthMapping.put(new Tag((String) values[i], type), state[i]);
+                            tagMapping.put(new Tag((String) values[i], type), state[i]);
                         }
+                        track.setTags(type, tagMapping);
                         dialog.dismiss();
                         txtTags.setText(track.getTagsAsString(type));
                     }

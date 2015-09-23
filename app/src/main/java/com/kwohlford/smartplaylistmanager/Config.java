@@ -50,7 +50,7 @@ public class Config {
             redirectURI = parsed[1];
             Log.d(TAG, "Loaded redirect uri: " + parsed[1]);
             requestCode = Integer.valueOf(parsed[2]);
-            Log.d(TAG, "Loaded request code: " + parsed[2]);
+            Log.d(TAG, "Loaded auth request code: " + parsed[2]);
         } catch (IOException ioe) {
             Log.e("Configuration failed", "Unable to read config file");
             ioe.printStackTrace();
@@ -58,7 +58,9 @@ public class Config {
             if (stream != null) {
                 try {
                     stream.close();
-                } catch (IOException e) {}
+                } catch (IOException e) {
+                    Log.d("Configuration failed", "Unable to read config file.");
+                }
             }
         }
 

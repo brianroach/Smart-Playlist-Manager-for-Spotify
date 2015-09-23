@@ -1,6 +1,11 @@
 package com.kwohlford.smartplaylistmanager;
 
+import com.kwohlford.smartplaylistmanager.db.SourceTrackData;
+
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Container for storing data for a single track.
@@ -16,9 +21,8 @@ public class TrackData {
     private float rating;
     protected HashMap<Tag, Boolean> genreTags;
     protected HashMap<Tag, Boolean> moodTags;
-    public boolean cardExpanded = false;
     public boolean previewPlaying = false;
-
+    public SourceTrackData database;
 
     /**
      * @param uri Spotify URI
@@ -27,9 +31,7 @@ public class TrackData {
      * @param albumName Album name
      * @param previewUrl URL to 30-sec preview clip
      * @param albumArtUrl URL to primary album art
-     * @param rating User rating (out of 5)
-     * @param genreTags Mapping of available genres to set value
-     * @param moodTags Mapping of available moods to set value
+     * @param database Data source for saving track changes
      */
     public TrackData(
             String uri,
@@ -38,22 +40,22 @@ public class TrackData {
             String albumName,
             String previewUrl,
             String albumArtUrl,
-            float rating,
-            HashMap<Tag, Boolean> genreTags,
-            HashMap<Tag, Boolean> moodTags) {
+            SourceTrackData database) {
         this.uri = uri;
         this.songTitle = songTitle;
         this.artist = artist;
         this.albumName = albumName;
         this.previewUrl = previewUrl;
         this.albumArtUrl = albumArtUrl;
-        this.rating = rating;
-        this.genreTags = genreTags;
-        this.moodTags = moodTags;
+        this.database = database;
+        rating = database.getRating(uri);
+        genreTags = database.getTrackTags(uri, Tag.TagType.GENRE);
+        moodTags = database.getTrackTags(uri, Tag.TagType.MOOD);
     }
 
     public void setRating(float rating) {
-        this.rating = Math.max(Math.min(rating, 5f), 0f);
+        this.rating = rating;
+        database.setRating(uri, rating);
     }
 
     public float getRating() {
@@ -75,17 +77,25 @@ public class TrackData {
         }
     }
 
-    /**
-     * @param tag Tag to set value of
-     * @param b True to tag this track, false to remove the tag
-     */
-    public void setTag(Tag tag, boolean b) {
-        switch(tag.type) {
+    public void setTags(Tag.TagType type, HashMap<Tag, Boolean> tagMapping) {
+        HashMap<Tag, Boolean> oldMap;
+        switch(type) {
             case GENRE:
-                genreTags.put(tag, b);
+                oldMap = genreTags;
+                genreTags = tagMapping;
+                break;
             case MOOD:
-                moodTags.put(tag, b);
+                oldMap = moodTags;
+                moodTags = tagMapping;
+                break;
+            default:
+                oldMap = new HashMap<>();
         }
+
+        Set<Map.Entry<Tag, Boolean>> changedEntries = new HashSet<>(tagMapping.entrySet());
+        changedEntries.removeAll(oldMap.entrySet());
+
+        database.setTrackTags(uri, changedEntries);
     }
 
     /**

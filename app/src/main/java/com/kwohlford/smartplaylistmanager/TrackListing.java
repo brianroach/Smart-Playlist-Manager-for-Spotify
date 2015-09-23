@@ -8,8 +8,8 @@ import java.util.HashMap;
  */
 public class TrackListing {
 
-    private HashMap<String, TrackData> trackMap;
-    private ArrayList<TrackData> savedTracks;
+    private final HashMap<String, TrackData> trackMap;
+    private final ArrayList<TrackData> savedTracks;
     public ArrayList<Tag> genreTags;
     public ArrayList<Tag> moodTags;
 

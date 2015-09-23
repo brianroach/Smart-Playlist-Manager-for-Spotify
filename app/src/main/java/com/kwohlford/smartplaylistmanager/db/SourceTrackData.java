@@ -15,37 +15,24 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Convenience methods for retrieving data from the database.
- *
- * query example:
- * Cursor results = database.query(                    // select from
- * DBHelper.DB_NAME,                             // table name
- * new String[] { DBHelper.COL_TAGS_NAME },            // columns
- * "category = " + type.id,                            // where clause
- * null,                                               // selection args
- * null,                                               // group by
- * null,                                               // having
- * null                                                // order by
- );
- *
+ * Convenience methods for retrieving data from the trackdata database.
  */
 public class SourceTrackData extends DBDataSource {
 
+    // Basic database info
     public static final String DB_NAME = "trackdata.db";
-    public static final String TEST_DB_NAME = "trackdata_test.db";
     public static final int DATABASE_VERSION = 4;
 
-    private boolean updateCachedTags;
+    // Cached lists of retrieved tags to reduce database calls
     private ArrayList<Tag> cachedGenreTags;
     private ArrayList<Tag> cachedMoodTags;
 
-    public SourceTrackData(Context context) {
-        this(context, false);
-    }
+    // True if tag caches need to be updated, false otherwise
+    private boolean updateCachedTags;
 
-    public SourceTrackData(Context context, boolean accessTestDatabase) {
+    public SourceTrackData(Context context) {
         super(context,
-                accessTestDatabase ? TEST_DB_NAME : DB_NAME,
+                DB_NAME,
                 DATABASE_VERSION,
                 new TableTags(), new TableTrackTags(), new TableRatings());
         updateCachedTags = true;
@@ -57,6 +44,10 @@ public class SourceTrackData extends DBDataSource {
         updateCachedTags = true;
     }
 
+    /**
+     * @param type Category of tags to retrieve
+     * @return List of all available tags in the category
+     */
     public ArrayList<Tag> getTagsByType(Tag.TagType type) {
         if(updateCachedTags) {
             cachedGenreTags = updateCachedTags(Tag.TagType.GENRE);
@@ -74,6 +65,11 @@ public class SourceTrackData extends DBDataSource {
         }
     }
 
+    /**
+     * Queries the database to update the cached tag lists.
+     * @param type Category of tags to query for
+     * @return Updated list of tags
+     */
     private ArrayList<Tag> updateCachedTags(Tag.TagType type) {
         Cursor results = database.query(
                 TableTags.NAME,
@@ -92,21 +88,36 @@ public class SourceTrackData extends DBDataSource {
         return tags;
     }
 
+    /**
+     * TODO
+     * @param tag
+     */
     public void addTag(Tag tag) {
-        // TODO
         updateCachedTags = true;
     }
 
+    /**
+     * TODO
+     * @param tag
+     */
     public void deleteTag(Tag tag) {
-        // TODO
         updateCachedTags = true;
     }
 
+    /**
+     * TODO
+     * @param prev
+     * @param edited
+     */
     public void editTag(Tag prev, Tag edited) {
-        // TODO
         updateCachedTags = true;
     }
 
+    /**
+     * Queries the database to get a track's rating.
+     * @param trackUri Uri of track to search for
+     * @return User-defined rating of the track (or 0 if none has been set)
+     */
     public float getRating(String trackUri) {
         Cursor results = database.query(
                 TableRatings.NAME,
@@ -121,6 +132,11 @@ public class SourceTrackData extends DBDataSource {
         return rating;
     }
 
+    /**
+     * Inserts or overwrites a track's rating in the database.
+     * @param trackUri Track to set rating for
+     * @param rating User rating out of 5
+     */
     public void setRating(String trackUri, float rating) {
         ContentValues values = new ContentValues();
         values.put(TableRatings.COL_ID, trackUri);
@@ -134,12 +150,12 @@ public class SourceTrackData extends DBDataSource {
         );
     }
 
-//    SELECT tags.name, tags.category
-//    FROM track_tags
-//    JOIN tags ON tags.id = track_tags.tag_id
-//    WHERE track_tags.track_id = "uri::song1"
-//    AND tags.category = 1
-
+    /**
+     * Queries the database to get all tags associated with a track.
+     * @param trackUri Track to search for
+     * @param type Category of tags to retrieve
+     * @return List of tags associated with the track
+     */
     public HashMap<Tag, Boolean> getTrackTags(String trackUri, Tag.TagType type) {
         String query =
                 "SELECT tags.name " +
@@ -166,30 +182,59 @@ public class SourceTrackData extends DBDataSource {
         return tagMapping;
     }
 
+    /**
+     * Updates the tags associated with a track based on a list of changes.
+     * @param trackUri Track uri
+     * @param changedEntries Tags which have changed since the last update, mapped to a boolean
+     *                       indicating whether to add (if true) or remove (if false) the tag
+     */
     public void setTrackTags(String trackUri, Set<Map.Entry<Tag, Boolean>> changedEntries) {
         for(Map.Entry<Tag, Boolean> entry : changedEntries) {
             int tagKey = lookupTagKey(entry.getKey());
             if(entry.getValue()) {
-                ContentValues values = new ContentValues();
-                values.put(TableTrackTags.COL_TRACKID, trackUri);
-                values.put(TableTrackTags.COL_TAGID, tagKey);
                 Log.d("Database", "Adding tag " + entry.getKey().name + " to track " + trackUri);
-                database.insert(
-                        TableTrackTags.NAME,
-                        null,
-                        values
-                );
+                addTrackTag(trackUri, tagKey);
             } else {
                 Log.d("Database", "Deleting tag " + entry.getKey().name + " from track " + trackUri);
-                database.delete(
-                        TableTrackTags.NAME,
-                        TableTrackTags.COL_TAGID + " = ? AND " + TableTrackTags.COL_TRACKID + " = ?",
-                        new String[] { String.valueOf(tagKey), trackUri }
-                );
+                deleteTrackTag(trackUri, tagKey);
             }
         }
     }
 
+    /**
+     * Adds a new entry in the database linking a tag to a track.
+     * @param trackUri Track uri
+     * @param tagKey PK of tag entry in 'tags' table
+     */
+    private void addTrackTag(String trackUri, int tagKey) {
+        ContentValues values = new ContentValues();
+        values.put(TableTrackTags.COL_TRACKID, trackUri);
+        values.put(TableTrackTags.COL_TAGID, tagKey);
+        database.insert(
+                TableTrackTags.NAME,
+                null,
+                values
+        );
+    }
+
+    /**
+     * Deletes an entry in the database linking a tag to a track.
+     * @param trackUri Track uri
+     * @param tagKey PK of tag entry in 'tags' table
+     */
+    private void deleteTrackTag(String trackUri, int tagKey) {
+        database.delete(
+                TableTrackTags.NAME,
+                TableTrackTags.COL_TAGID + " = ? AND " + TableTrackTags.COL_TRACKID + " = ?",
+                new String[]{String.valueOf(tagKey), trackUri}
+        );
+    }
+
+    /**
+     * Looks up the primary key associated with a stored tag.
+     * @param tag Tag to search for
+     * @return Integer primary key of that tag's database entry.
+     */
     private int lookupTagKey(Tag tag) {
         Cursor results = database.query(
                 TableTags.NAME,

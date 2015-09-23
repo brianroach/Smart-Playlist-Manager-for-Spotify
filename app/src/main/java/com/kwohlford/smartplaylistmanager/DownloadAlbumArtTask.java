@@ -15,7 +15,7 @@ public class DownloadAlbumArtTask extends AsyncTask<String, Void, Bitmap> {
 
     private static final String TAG = "DownloadAlbumArt";
 
-    private ImageView albumImage;
+    private final ImageView albumImage;
 
     public DownloadAlbumArtTask(ImageView albumImage) {
         this.albumImage = albumImage;

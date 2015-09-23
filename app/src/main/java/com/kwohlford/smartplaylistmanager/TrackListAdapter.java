@@ -15,22 +15,22 @@ import android.widget.TextView;
  */
 public class TrackListAdapter extends RecyclerView.Adapter<TrackListAdapter.ViewHolder> {
 
-    private TrackListing trackDataset;
+    private final TrackListing trackDataset;
 
     /**
      * Contains references to all views on a card.
      */
     protected static class ViewHolder extends RecyclerView.ViewHolder {
-        private CardView cv;
-        private LinearLayout ll;
-        private TextView songTitle;
-        private TextView artist;
-        private TextView albumName;
-        private ImageView albumThumbnail;
-        private ImageView playbackButton;
-        private RatingBar songRating;
-        private TextView genreTags;
-        private TextView moodTags;
+        private final CardView cv;
+        private final LinearLayout ll;
+        private final TextView songTitle;
+        private final TextView artist;
+        private final TextView albumName;
+        private final ImageView albumThumbnail;
+        private final ImageView playbackButton;
+        private final RatingBar songRating;
+        private final TextView genreTags;
+        private final TextView moodTags;
 
         protected ViewHolder(View v) {
             super(v);

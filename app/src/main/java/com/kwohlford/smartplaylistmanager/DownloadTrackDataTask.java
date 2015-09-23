@@ -20,7 +20,7 @@ public class DownloadTrackDataTask extends AsyncTask<SpotifyService, Void, Track
     private static final int TRACKS_PER_PAGE = 50;
     private static final String OPTIONS_LIMIT = "limit";
     private static final String OPTIONS_OFFSET = "offset";
-    private TrackListActivity trackListScreen;
+    private final TrackListActivity trackListScreen;
 
     public DownloadTrackDataTask(TrackListActivity trackListScreen) {
         this.trackListScreen = trackListScreen;

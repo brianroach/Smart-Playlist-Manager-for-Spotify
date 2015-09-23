@@ -22,7 +22,7 @@ public class TrackData {
     protected HashMap<Tag, Boolean> genreTags;
     protected HashMap<Tag, Boolean> moodTags;
     public boolean previewPlaying = false;
-    public SourceTrackData database;
+    public final SourceTrackData database;
 
     /**
      * @param uri Spotify URI

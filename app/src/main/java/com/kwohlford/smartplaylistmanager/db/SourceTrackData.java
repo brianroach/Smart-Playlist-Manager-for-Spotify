@@ -7,7 +7,7 @@ import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
-import com.kwohlford.smartplaylistmanager.Tag;
+import com.kwohlford.smartplaylistmanager.tracklist.Tag;
 
 import java.util.ArrayList;
 import java.util.HashMap;

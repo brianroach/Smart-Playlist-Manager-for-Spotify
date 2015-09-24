@@ -1,16 +1,33 @@
 <resources>
-    <string name="app_name">SmartPlaylistManager</string>
+    <string name="app_name">Smart Playlist Manager for Spotify</string>
+
+    <string name="title_activity_tracklist">Saved Tracks</string>
+    <string name="title_activity_edittags">Edit Tags</string>
+    <string name="title_activity_editgenres">Edit Genre Tags</string>
+    <string name="title_activity_editmoods">Edit Mood Tags</string>
 
     <string name="action_settings">Settings</string>
+
     <string name="desc_albumart">Album art</string>
     <string name="desc_playpreview">Play preview track</string>
     <string name="desc_tags">Tags</string>
+    <string name="desc_tag">Tag</string>
+    <string name="desc_edittag">Edit tag</string>
+    <string name="desc_deletetag">Delete tag</string>
+
     <string name="placeholder_songtitle">Song Title</string>
     <string name="placeholder_artist">Artist</string>
     <string name="placeholder_album">Album</string>
     <string name="placeholder_taglist">Tag list</string>
+    <string name="placeholder_tagname">(tag name)</string>
+
     <string name="button_editgenre">EDIT GENRE TAGS</string>
     <string name="button_editmood">EDIT MOOD TAGS</string>
+
     <string name="tag_expanded">expanded</string>
     <string name="tag_collapsed">collapsed</string>
+    <string name="desc_newtag">New tag</string>
+    <string name="txt_createtag">Create new tag</string>
+    <string name="button_cancelchanges">CANCEL CHANGES</string>
+    <string name="button_savechanges">SAVE CHANGES</string>
 </resources>

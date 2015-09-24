@@ -1,4 +1,4 @@
-package com.kwohlford.smartplaylistmanager;
+package com.kwohlford.smartplaylistmanager.tracklist;
 
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
@@ -9,6 +9,8 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RatingBar;
 import android.widget.TextView;
+
+import com.kwohlford.smartplaylistmanager.R;
 
 /**
  * RecyclerView adapter for saved track list.

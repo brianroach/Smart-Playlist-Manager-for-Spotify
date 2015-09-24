@@ -1,4 +1,4 @@
-package com.kwohlford.smartplaylistmanager;
+package com.kwohlford.smartplaylistmanager.tracklist;
 
 import android.os.AsyncTask;
 import android.util.Log;

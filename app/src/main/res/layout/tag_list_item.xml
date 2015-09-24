@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal"
+    android:layout_width="match_parent"
+    android:layout_height="75dp">
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:id="@+id/imageView5"
+        android:src="@drawable/tag_outline"
+        android:contentDescription="@string/desc_tag" />
+
+    <Space
+        android:layout_width="10dp"
+        android:layout_height="match_parent"
+        android:id="@+id/space4" />
+
+    <TextView
+        android:layout_width="0dp"
+        android:layout_weight="1"
+        android:layout_height="match_parent"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="@string/placeholder_tagname"
+        android:id="@+id/txtTagName"
+        android:gravity="center_vertical" />
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:id="@+id/imgEditTag"
+        android:src="@drawable/edit_outline"
+        android:contentDescription="@string/desc_edittag"
+        android:clickable="true"
+        android:onClick="editTag" />
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:id="@+id/imgDeleteTag"
+        android:src="@drawable/x_box"
+        android:contentDescription="@string/desc_deletetag"
+        android:onClick="deleteTag" />
+
+</LinearLayout>

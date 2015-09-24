@@ -1,4 +1,4 @@
-package com.kwohlford.smartplaylistmanager;
+package com.kwohlford.smartplaylistmanager.tracklist;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;

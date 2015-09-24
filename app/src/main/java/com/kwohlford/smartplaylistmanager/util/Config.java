@@ -1,4 +1,4 @@
-package com.kwohlford.smartplaylistmanager;
+package com.kwohlford.smartplaylistmanager.util;
 
 import android.content.Context;
 import android.content.res.AssetManager;
@@ -14,14 +14,16 @@ public class Config {
 
     private final static String TAG = "Config";
     private final static String CONFIG_FILENAME = "smartplaylistmanager.config";
+
+    public final static int REQCODE_AUTH = 3333;
+    public final static int REQCODE_EDITTAGS = 4444;
+
     public final String clientId;
     public final String redirectUri;
-    public final int authRequestCode;
 
-    private Config(String clientId, String redirectUri, int authRequestCode) {
+    private Config(String clientId, String redirectUri) {
         this.clientId = clientId;
         this.redirectUri = redirectUri;
-        this.authRequestCode = authRequestCode;
     }
 
     /**
@@ -32,7 +34,6 @@ public class Config {
     public static Config loadConfig(Context context) {
         String clientId = "";
         String redirectURI = "";
-        int requestCode = 0;
         AssetManager assets = context.getAssets();
         InputStream stream = null;
 
@@ -49,8 +50,6 @@ public class Config {
             Log.d(TAG, "Loaded client id: " + parsed[0]);
             redirectURI = parsed[1];
             Log.d(TAG, "Loaded redirect uri: " + parsed[1]);
-            requestCode = Integer.valueOf(parsed[2]);
-            Log.d(TAG, "Loaded auth request code: " + parsed[2]);
         } catch (IOException ioe) {
             Log.e("Configuration failed", "Unable to read config file");
             ioe.printStackTrace();
@@ -64,7 +63,7 @@ public class Config {
             }
         }
 
-        return new Config(clientId, redirectURI, requestCode);
+        return new Config(clientId, redirectURI);
     }
 
 

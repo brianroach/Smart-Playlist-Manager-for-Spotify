@@ -1,4 +1,4 @@
-package com.kwohlford.smartplaylistmanager;
+package com.kwohlford.smartplaylistmanager.tracklist;
 
 import com.kwohlford.smartplaylistmanager.db.SourceTrackData;
 

@@ -1,4 +1,4 @@
-package com.kwohlford.smartplaylistmanager;
+package com.kwohlford.smartplaylistmanager.tracklist;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -21,12 +21,15 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.kwohlford.smartplaylistmanager.R;
 import com.kwohlford.smartplaylistmanager.db.SourceTrackData;
+import com.kwohlford.smartplaylistmanager.util.Config;
 import com.spotify.sdk.android.authentication.AuthenticationClient;
 import com.spotify.sdk.android.authentication.AuthenticationRequest;
 import com.spotify.sdk.android.authentication.AuthenticationResponse;
 import com.spotify.sdk.android.player.ConnectionStateCallback;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import kaaes.spotify.webapi.android.SpotifyApi;
@@ -53,7 +56,7 @@ public class TrackListActivity extends Activity implements
             CARD_MAX_DP = 280;
 
     // Loading bar
-    protected ProgressBar progressBar;
+    public ProgressBar progressBar;
 
     // Vars for tracking playback of preview clips
     private boolean playback;
@@ -70,7 +73,7 @@ public class TrackListActivity extends Activity implements
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_tracklist);
 
         // Load API authentication data from config file
         config = Config.loadConfig(this);
@@ -81,7 +84,7 @@ public class TrackListActivity extends Activity implements
                 config.redirectUri);
         builder.setScopes(new String[]{"user-read-private", "user-library-read"});
         AuthenticationRequest request = builder.build();
-        AuthenticationClient.openLoginActivity(this, config.authRequestCode, request);
+        AuthenticationClient.openLoginActivity(this, Config.REQCODE_AUTH, request);
 
         // Set up views
         recycler = (RecyclerView) findViewById(R.id.recycler_track_list);
@@ -104,7 +107,7 @@ public class TrackListActivity extends Activity implements
     protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
         super.onActivityResult(requestCode, resultCode, intent);
 
-        if (requestCode == config.authRequestCode) {
+        if (requestCode == Config.REQCODE_AUTH) { // Result came from user login
             AuthenticationResponse response = AuthenticationClient.getResponse(resultCode, intent);
             if (response.getType() == AuthenticationResponse.Type.TOKEN) {
                 // Initialize spotify service
@@ -115,6 +118,18 @@ public class TrackListActivity extends Activity implements
                 // Start loading track data
                 progressBar.setVisibility(View.VISIBLE);
                 new DownloadTrackDataTask(this).execute(spotify);
+            }
+        } else if(requestCode == Config.REQCODE_EDITTAGS) { // Result came from edit tags activity
+            Bundle extras = intent.getExtras();
+            ArrayList<Tag> changedTags = extras.getParcelableArrayList(EditTagsActivity.KEY_TAGLIST);
+            for(Tag t : changedTags) {
+                if(t.changeFlag == Tag.FLAG_ADDED) {
+                    Log.d("Edit Tags", "Adding tag " + t.name);
+                } else if(t.changeFlag == Tag.FLAG_DELETED) {
+                    Log.d("Edit Tags", "Deleting tag " + t.name);
+                } else if(t.changeFlag == Tag.FLAG_CHANGED) {
+                    Log.d("Edit Tags", "Renaming tag " + t.prevName + " to " + t.name);
+                }
             }
         }
     }
@@ -356,7 +371,21 @@ public class TrackListActivity extends Activity implements
                         dialog.dismiss();
                     }
                 })
+                .setNeutralButton("Edit tags", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        openEditTagsScreen(type);
+                    }
+                })
                 .create();
+    }
+
+    private void openEditTagsScreen(Tag.TagType type) {
+        Intent intent = new Intent(this, EditTagsActivity.class);
+        intent.putExtra(EditTagsActivity.KEY_TYPE, type.id);
+        intent.putParcelableArrayListExtra(EditTagsActivity.KEY_TAGLIST,
+                type == Tag.TagType.GENRE ? tracks.genreTags : tracks.moodTags);
+        startActivityForResult(intent, Config.REQCODE_EDITTAGS);
     }
 
 }

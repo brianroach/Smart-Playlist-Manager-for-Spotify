@@ -2,6 +2,7 @@ package com.kwohlford.smartplaylistmanager.tracklist;
 
 import com.kwohlford.smartplaylistmanager.db.SourceTrackData;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -19,8 +20,8 @@ public class TrackData {
     public final String previewUrl;
     public final String albumArtUrl;
     private float rating;
-    protected HashMap<Tag, Boolean> genreTags;
-    protected HashMap<Tag, Boolean> moodTags;
+    protected ArrayList<Tag> genreTags;
+    protected ArrayList<Tag> moodTags;
     public boolean previewPlaying = false;
     public final SourceTrackData database;
 
@@ -66,36 +67,37 @@ public class TrackData {
      * @param type Category of tags to get
      * @return Mapping of tags to their set value
      */
-    public HashMap<Tag, Boolean> getTags(Tag.TagType type) {
+    public ArrayList<Tag> getTags(Tag.TagType type) {
         switch(type) {
             case GENRE:
                 return genreTags;
             case MOOD:
                 return moodTags;
             default:
-                return new HashMap<>();
+                return new ArrayList<>();
         }
     }
 
-    public void setTags(Tag.TagType type, HashMap<Tag, Boolean> tagMapping) {
-        HashMap<Tag, Boolean> oldMap;
+    public void setTags(Tag.TagType type, ArrayList<Tag> newTags) {
+        ArrayList<Tag> oldTags;
         switch(type) {
             case GENRE:
-                oldMap = genreTags;
-                genreTags = tagMapping;
+                oldTags = genreTags;
+                genreTags = newTags;
                 break;
             case MOOD:
-                oldMap = moodTags;
-                moodTags = tagMapping;
+                oldTags = moodTags;
+                moodTags = newTags;
                 break;
             default:
-                oldMap = new HashMap<>();
+                oldTags = new ArrayList<>();
         }
+        Set<Tag> deleted = new HashSet<>(oldTags);
+        Set<Tag> added = new HashSet<>(newTags);
+        deleted.removeAll(added);
+        added.removeAll(deleted);
 
-        Set<Map.Entry<Tag, Boolean>> changedEntries = new HashSet<>(tagMapping.entrySet());
-        changedEntries.removeAll(oldMap.entrySet());
-
-        database.setTrackTags(uri, changedEntries);
+        database.setTrackTags(uri, new ArrayList<>(added), new ArrayList<>(deleted));
     }
 
     /**
@@ -104,7 +106,7 @@ public class TrackData {
      */
     public String getTagsAsString(Tag.TagType type) {
         StringBuilder s = new StringBuilder();
-        HashMap<Tag, Boolean> tags;
+        ArrayList<Tag> tags;
         if(type == Tag.TagType.GENRE) {
             s.append("Genres: ");
             tags = genreTags;
@@ -114,11 +116,9 @@ public class TrackData {
         }
 
         boolean hasTags = false;
-        for(Tag tag : tags.keySet()) {
-            if(tags.get(tag)) {
-                hasTags = true;
-                s.append(tag).append(", ");
-            }
+        for(Tag tag : tags) {
+            hasTags = true;
+            s.append(tag).append(", ");
         }
         if(hasTags) {
             s.deleteCharAt(s.lastIndexOf(","));

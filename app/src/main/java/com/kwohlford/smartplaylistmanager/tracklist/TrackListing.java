@@ -32,4 +32,23 @@ public class TrackListing {
         return trackMap.get(uri);
     }
 
+    public ArrayList<Tag> getTagsByType(Tag.TagType type) {
+        switch (type) {
+            case GENRE:
+                return genreTags;
+            case MOOD:
+                return moodTags;
+            default:
+                return new ArrayList<>();
+        }
+    }
+
+    public void deleteTag(Tag t) {
+        getTagsByType(t.type).remove(t);
+    }
+
+    public void addTag(Tag t) {
+        getTagsByType(t.type).add(t);
+    }
+
 }

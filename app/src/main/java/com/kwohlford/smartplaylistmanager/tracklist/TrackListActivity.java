@@ -122,14 +122,36 @@ public class TrackListActivity extends Activity implements
         } else if(requestCode == Config.REQCODE_EDITTAGS) { // Result came from edit tags activity
             Bundle extras = intent.getExtras();
             ArrayList<Tag> changedTags = extras.getParcelableArrayList(EditTagsActivity.KEY_TAGLIST);
-            for(Tag t : changedTags) {
-                if(t.changeFlag == Tag.FLAG_ADDED) {
-                    Log.d("Edit Tags", "Adding tag " + t.name);
-                } else if(t.changeFlag == Tag.FLAG_DELETED) {
-                    Log.d("Edit Tags", "Deleting tag " + t.name);
-                } else if(t.changeFlag == Tag.FLAG_CHANGED) {
-                    Log.d("Edit Tags", "Renaming tag " + t.prevName + " to " + t.name);
+            if (changedTags != null) {
+                for(Tag t : changedTags) {
+                    if(t.changeFlag == Tag.FLAG_ADDED) {
+                        Log.d("Edit Tags", "Adding tag " + t.name);
+                        database.addTag(t);
+                        tracks.addTag(t);
+                    } else if(t.changeFlag == Tag.FLAG_DELETED) {
+                        Log.d("Edit Tags", "Deleting tag " + t.name);
+                        ArrayList<String> tracksWithTag = database.getTrackUrisWithTag(t);
+                        for(String s : tracksWithTag) {
+                            tracks.getTrackForUri(s).getTags(t.type).remove(t);
+                        }
+                        tracks.deleteTag(t);
+                        database.deleteTag(t);
+                    } else if(t.changeFlag == Tag.FLAG_CHANGED) {
+                        Log.d("Edit Tags", "Renaming tag " + t.prevName + " to " + t.name);
+                        Tag oldTag = new Tag(t.prevName, t.type);
+                        ArrayList<String> tracksWithTag = database.getTrackUrisWithTag(oldTag);
+                        for(String s : tracksWithTag) {
+                            ArrayList<Tag> trackTags = tracks.getTrackForUri(s).getTags(t.type);
+                            trackTags.remove(oldTag);
+                            trackTags.add(t);
+                        }
+                        tracks.addTag(t);
+                        tracks.deleteTag(oldTag);
+                        database.editTag(oldTag, t);
+                    }
+                    t.changeFlag = Tag.FLAG_NONE;
                 }
+                setRecyclerAdapter(new TrackListAdapter(tracks));
             }
         }
     }
@@ -333,15 +355,16 @@ public class TrackListActivity extends Activity implements
             final TrackData track,
             final Tag.TagType type,
             final TextView txtTags) {
-        final HashMap<Tag, Boolean> truthMapping = track.getTags(type);
-        final CharSequence[] values = new CharSequence[truthMapping.keySet().size()];
-        final boolean[] state = new boolean[truthMapping.keySet().size()];
-        int i = 0;
-        for(Tag tag : truthMapping.keySet()) {
-            values[i] = tag.name;
-            state[i] = truthMapping.get(tag);
-            Log.d("Loading tag", (String) values[i] + state[i]);
-            i++;
+
+        ArrayList<Tag> allTags = tracks.getTagsByType(type);
+        ArrayList<Tag> trackTags = track.getTags(type);
+
+        final CharSequence[] values = new CharSequence[allTags.size()];
+        final boolean[] state = new boolean[allTags.size()];
+        for(int i = 0; i < allTags.size(); i++) {
+            values[i] = allTags.get(i).name;
+            state[i] = trackTags.contains(allTags.get(i));
+            Log.d("Loading tag", values[i] + ": " + state[i]);
         }
 
         return new AlertDialog.Builder(this)
@@ -355,12 +378,12 @@ public class TrackListActivity extends Activity implements
                 .setPositiveButton("Save", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int index) {
-                        HashMap<Tag, Boolean> tagMapping = new HashMap<>();
+                        ArrayList<Tag> newTags = new ArrayList<>();
                         for (int i = 0; i < values.length; i++) {
-                            Log.d("Setting tag", (String) values[i] + state[i]);
-                            tagMapping.put(new Tag((String) values[i], type), state[i]);
+                            Log.d("Setting tag", values[i] + ": " + state[i]);
+                            if(state[i]) newTags.add(new Tag((String) values[i], type));
                         }
-                        track.setTags(type, tagMapping);
+                        track.setTags(type, newTags);
                         dialog.dismiss();
                         txtTags.setText(track.getTagsAsString(type));
                     }

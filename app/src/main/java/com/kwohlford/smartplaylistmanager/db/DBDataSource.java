@@ -28,7 +28,7 @@ public class DBDataSource {
     }
 
     public void close() {
-        dbHelper.close();
+//        dbHelper.close();
     }
 
 }

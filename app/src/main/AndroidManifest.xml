@@ -13,8 +13,8 @@
         android:theme="@style/AppTheme"
         tools:ignore="UnusedAttribute" >
         <activity
-            android:name=".tracklist.TrackListActivity"
-            android:label="@string/title_activity_tracklist"
+            android:name=".StartActivity"
+            android:label="@string/title_activity_start"
             android:theme="@android:style/Theme.Holo.Light.DarkActionBar" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -22,17 +22,20 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
-        // spotify login activity
+        <activity
+            android:name=".tracklist.TrackListActivity"
+            android:label="@string/title_activity_tracklist"
+            android:theme="@android:style/Theme.Holo.Light.DarkActionBar"
+            android:parentActivityName=".tracklist.TrackListActivity" >
+        </activity>
         <activity
             android:name="com.spotify.sdk.android.authentication.LoginActivity"
             android:theme="@android:style/Theme.Translucent.NoTitleBar" />
-
         <activity
             android:name=".tracklist.EditTagsActivity"
             android:label="@string/title_activity_edittags"
-            android:theme="@android:style/Theme.Holo.Light.Dialog"
-            android:parentActivityName=".tracklist.TrackListActivity" >
+            android:parentActivityName=".tracklist.TrackListActivity"
+            android:theme="@android:style/Theme.Holo.Light.Dialog" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".tracklist.TrackListActivity" />

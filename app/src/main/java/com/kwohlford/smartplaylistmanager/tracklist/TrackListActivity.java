@@ -22,6 +22,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.kwohlford.smartplaylistmanager.R;
+import com.kwohlford.smartplaylistmanager.StartActivity;
 import com.kwohlford.smartplaylistmanager.db.SourceTrackData;
 import com.kwohlford.smartplaylistmanager.util.Config;
 import com.spotify.sdk.android.authentication.AuthenticationClient;
@@ -75,51 +76,41 @@ public class TrackListActivity extends Activity implements
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_tracklist);
 
-        // Load API authentication data from config file
-        config = Config.loadConfig(this);
+        // Make sure user successfully logged in
+        Bundle extras = getIntent().getExtras();
+        AuthenticationResponse authResponse = (AuthenticationResponse) extras.get(StartActivity.KEY_AUTH);
+        if(authResponse != null) {
+            // Set up views
+            recycler = (RecyclerView) findViewById(R.id.recycler_track_list);
+            recycler.setHasFixedSize(true);
+            recycler.setLayoutManager(new LinearLayoutManager(this));
 
-        // Prompt user login
-        AuthenticationRequest.Builder builder = new AuthenticationRequest.Builder(config.clientId,
-                AuthenticationResponse.Type.TOKEN,
-                config.redirectUri);
-        builder.setScopes(new String[]{"user-read-private", "user-library-read"});
-        AuthenticationRequest request = builder.build();
-        AuthenticationClient.openLoginActivity(this, Config.REQCODE_AUTH, request);
+            // Create media player
+            player = new MediaPlayer();
+            player.setAudioStreamType(AudioManager.STREAM_MUSIC);
+            playback = false;
 
-        // Set up views
-        recycler = (RecyclerView) findViewById(R.id.recycler_track_list);
-        recycler.setHasFixedSize(true);
-        RecyclerView.LayoutManager recyclerLayoutManager = new LinearLayoutManager(this);
-        recycler.setLayoutManager(recyclerLayoutManager);
-        progressBar = (ProgressBar) findViewById(R.id.progress_bar);
+            // Open database
+            database = new SourceTrackData(this);
+            database.open();
 
-        // Create media player
-        player = new MediaPlayer();
-        player.setAudioStreamType(AudioManager.STREAM_MUSIC);
-        playback = false;
+            // Initialize spotify service
+            SpotifyApi api = new SpotifyApi();
+            api.setAccessToken(authResponse.getAccessToken());
+            SpotifyService spotify = api.getService();
 
-        // Open database
-        database = new SourceTrackData(this);
-        database.open();
+            // Start loading track data
+            progressBar = (ProgressBar) findViewById(R.id.progress_bar);
+            progressBar.setVisibility(View.VISIBLE);
+            new DownloadTrackDataTask(this).execute(spotify);
+        }
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
         super.onActivityResult(requestCode, resultCode, intent);
 
-        if (requestCode == Config.REQCODE_AUTH) { // Result came from user login
-            AuthenticationResponse response = AuthenticationClient.getResponse(resultCode, intent);
-            if (response.getType() == AuthenticationResponse.Type.TOKEN) {
-                // Initialize spotify service
-                SpotifyApi api = new SpotifyApi();
-                api.setAccessToken(response.getAccessToken());
-                SpotifyService spotify = api.getService();
-
-                // Start loading track data
-                progressBar.setVisibility(View.VISIBLE);
-                new DownloadTrackDataTask(this).execute(spotify);
-            }
-        } else if(requestCode == Config.REQCODE_EDITTAGS) { // Result came from edit tags activity
+        if(requestCode == Config.REQCODE_EDITTAGS) { // Result came from edit tags activity
             Bundle extras = intent.getExtras();
             ArrayList<Tag> changedTags = extras.getParcelableArrayList(EditTagsActivity.KEY_TAGLIST);
             if (changedTags != null) {

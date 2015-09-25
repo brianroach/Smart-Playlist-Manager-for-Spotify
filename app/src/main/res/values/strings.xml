@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name">Smart Playlist Manager for Spotify</string>
 
+    <string name="title_activity_start">Smart Playlist Manager for Spotify</string>
     <string name="title_activity_tracklist">Saved Tracks</string>
     <string name="title_activity_edittags">Edit Tags</string>
     <string name="title_activity_editgenres">Edit Genre Tags</string>
@@ -14,6 +15,8 @@
     <string name="desc_tag">Tag</string>
     <string name="desc_edittag">Edit tag</string>
     <string name="desc_deletetag">Delete tag</string>
+    <string name="desc_next">Next</string>
+    <string name="desc_newtag">New tag</string>
 
     <string name="placeholder_songtitle">Song Title</string>
     <string name="placeholder_artist">Artist</string>
@@ -23,11 +26,15 @@
 
     <string name="button_editgenre">EDIT GENRE TAGS</string>
     <string name="button_editmood">EDIT MOOD TAGS</string>
+    <string name="button_cancelchanges">CANCEL CHANGES</string>
+    <string name="button_savechanges">SAVE CHANGES</string>
 
     <string name="tag_expanded">expanded</string>
     <string name="tag_collapsed">collapsed</string>
-    <string name="desc_newtag">New tag</string>
+
     <string name="txt_createtag">Create new tag</string>
-    <string name="button_cancelchanges">CANCEL CHANGES</string>
-    <string name="button_savechanges">SAVE CHANGES</string>
+    <string name="txt_manage">Manage Saved Tracks</string>
+    <string name="desc_newlist">New playlist</string>
+    <string name="txt_newplaylist">New Smart Playlist</string>
+    <string name="txt_playlists">PLAYLISTS</string>
 </resources>

@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="@dimen/activity_horizontal_margin">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="100dp"
+        android:layout_centerHorizontal="true"
+        android:id="@+id/relativeLayout"
+        android:orientation="horizontal">
+
+        <Space
+            android:layout_width="10dp"
+            android:layout_height="match_parent"
+            android:id="@+id/space9"
+            android:layout_weight="1" />
+
+        <RadioGroup
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:id="@+id/grpInclude"
+            android:layout_weight="2"
+            android:layout_gravity="center_horizontal">
+
+            <RadioButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/txt_include"
+                android:id="@+id/radioInclude"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:checked="true"
+                android:layout_weight="1" />
+
+            <RadioButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/txt_exclude"
+                android:id="@+id/radioExclude"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:layout_weight="1" />
+        </RadioGroup>
+
+        <Space
+            android:layout_width="10dp"
+            android:layout_height="match_parent"
+            android:id="@+id/space5"
+            android:layout_weight="1" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:text="@string/txt_allmatching"
+            android:id="@+id/textView4"
+            android:gravity="center"
+            android:layout_weight="3" />
+
+        <Space
+            android:layout_width="10dp"
+            android:layout_height="match_parent"
+            android:id="@+id/space8"
+            android:layout_weight="1" />
+
+
+    </LinearLayout>
+
+    <Space
+        android:layout_width="match_parent"
+        android:layout_height="10dp"
+        android:layout_below="@+id/relativeLayout"
+        android:layout_alignParentStart="true"
+        android:id="@+id/space6" />
+
+    <Spinner
+        android:layout_width="match_parent"
+        android:layout_height="100dp"
+        android:id="@+id/spinCriteria"
+        android:layout_below="@+id/space6"
+        android:layout_alignParentStart="true" />
+
+    <Spinner
+        android:layout_width="match_parent"
+        android:layout_height="100dp"
+        android:id="@+id/spinComparator"
+        android:layout_below="@+id/spinCriteria"
+        android:layout_alignParentStart="true" />
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/spinComparator"
+        android:layout_alignParentStart="true"
+        android:minHeight="100dp"
+        android:id="@+id/linearLayout2">
+
+        <RatingBar
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/ratingSingle"
+            android:layout_gravity="center_horizontal"
+            android:numStars="5"
+            android:visibility="gone" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:text="@string/txt_and"
+            android:id="@+id/txtRatingDouble"
+            android:layout_gravity="center_horizontal"
+            android:visibility="gone" />
+
+        <RatingBar
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/ratingDouble"
+            android:layout_gravity="center_horizontal"
+            android:numStars="5"
+            android:visibility="gone" />
+
+        <Spinner
+            android:layout_width="match_parent"
+            android:layout_height="100dp"
+            android:id="@+id/spinSelectSingle"
+            android:layout_gravity="center_horizontal"
+            android:visibility="gone"
+            android:spinnerMode="dialog" />
+
+        <Spinner
+            android:layout_width="match_parent"
+            android:layout_height="100dp"
+            android:id="@+id/spinSelectMultiple"
+            android:layout_gravity="center_horizontal"
+            android:visibility="gone"
+            android:spinnerMode="dialog" />
+
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="100dp"
+            android:id="@+id/txtboxContains"
+            android:inputType="text"
+            tools:ignore="LabelFor"
+            android:visibility="gone" />
+    </LinearLayout>
+
+    <LinearLayout
+        style="?android:attr/buttonBarStyle"
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentEnd="false"
+        android:layout_alignParentBottom="false"
+        android:id="@+id/linearLayout4"
+        android:layout_below="@+id/linearLayout2" >
+
+        <Button
+            style="?android:attr/buttonBarButtonStyle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="@string/button_cancelchanges"
+            android:id="@+id/btnCancel"
+            android:layout_weight="1" />
+
+        <Button
+            style="?android:attr/buttonBarButtonStyle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="@string/button_savechanges"
+            android:id="@+id/btnSave"
+            android:layout_weight="1" />
+    </LinearLayout>
+
+
+</RelativeLayout>

@@ -25,8 +25,8 @@
         <activity
             android:name=".tracklist.TrackListActivity"
             android:label="@string/title_activity_tracklist"
-            android:theme="@android:style/Theme.Holo.Light.DarkActionBar"
-            android:parentActivityName=".tracklist.TrackListActivity" >
+            android:parentActivityName=".tracklist.TrackListActivity"
+            android:theme="@android:style/Theme.Holo.Light.DarkActionBar" >
         </activity>
         <activity
             android:name="com.spotify.sdk.android.authentication.LoginActivity"
@@ -39,6 +39,15 @@
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".tracklist.TrackListActivity" />
+        </activity>
+        <activity
+            android:name=".playlist.CreatePlaylistActivity"
+            android:label="@string/title_activity_createplaylist"
+            android:parentActivityName=".StartActivity"
+            android:theme="@android:style/Theme.Holo.Light.Dialog" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.kwohlford.smartplaylistmanager.StartActivity" />
         </activity>
     </application>
 

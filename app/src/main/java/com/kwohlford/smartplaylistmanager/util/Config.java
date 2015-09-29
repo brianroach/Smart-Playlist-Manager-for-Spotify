@@ -16,7 +16,12 @@ public class Config {
     private final static String CONFIG_FILENAME = "smartplaylistmanager.config";
 
     public final static int REQCODE_AUTH = 3333;
-    public final static int REQCODE_EDITTAGS = 4444;
+
+    public final static String PREF_KEY_FIRSTOPEN = "firsttimeopen";
+    public final static boolean PREF_DEFAULT_FIRSTOPEN = true;
+
+    public final static String PREF_KEY_DBVERSION = "dbversion";
+    public final static int PREF_DEFAULT_DBVERSION = 1;
 
     public final String clientId;
     public final String redirectUri;
@@ -47,9 +52,7 @@ public class Config {
             }
             String[] parsed = contents.trim().split("\\n");
             clientId = parsed[0];
-            Log.d(TAG, "Loaded client id: " + parsed[0]);
             redirectURI = parsed[1];
-            Log.d(TAG, "Loaded redirect uri: " + parsed[1]);
         } catch (IOException ioe) {
             Log.e("Configuration failed", "Unable to read config file");
             ioe.printStackTrace();

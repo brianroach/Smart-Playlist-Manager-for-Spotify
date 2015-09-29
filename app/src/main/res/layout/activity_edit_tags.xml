@@ -69,16 +69,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             style="?android:attr/buttonBarButtonStyle"
-            android:text="@string/button_cancelchanges"
-            android:id="@+id/btnCancel"
-            android:layout_weight="1"
-            android:onClick="closeCancel" />
-
-        <Button
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            style="?android:attr/buttonBarButtonStyle"
-            android:text="@string/button_savechanges"
+            android:text="@string/button_continue"
             android:id="@+id/btnSave"
             android:layout_weight="1"
             android:onClick="closeSave" />

@@ -2,6 +2,8 @@ package com.kwohlford.smartplaylistmanager.db;
 
 import android.database.sqlite.SQLiteDatabase;
 
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -10,7 +12,7 @@ import java.util.Map;
 public abstract class DBTable {
 
     public final String name;
-    public final Map<String, DataType> columns;
+    public final List<String> columns;
 
     /* Possible types for column data */
     public enum DataType {
@@ -38,14 +40,15 @@ public abstract class DBTable {
     public void onCreate(SQLiteDatabase db) {
         if(columns.isEmpty()) return;
 
+        Map<String, DataType> colTypes = getColumnsTypes();
         StringBuilder s = new StringBuilder()
                 .append("CREATE TABLE ")
                 .append(name)
                 .append("(");
-        for(String colName : columns.keySet()) {
+        for(String colName : columns) {
             s.append(colName)
                     .append(" ")
-                    .append(columns.get(colName).name)
+                    .append(colTypes.get(colName).name)
                     .append(", ");
         }
         s.replace(s.length()-2, s.length(), ")");
@@ -69,8 +72,13 @@ public abstract class DBTable {
     protected abstract void generateDefaultData(SQLiteDatabase db);
 
     /**
+     * @return List of columns (in order by column index)
+     */
+    public abstract List<String> getColumns();
+
+    /**
      * @return Mapping of columns to their data type
      */
-    public abstract Map<String, DataType> getColumns();
+    public abstract Map<String, DataType> getColumnsTypes();
 
 }

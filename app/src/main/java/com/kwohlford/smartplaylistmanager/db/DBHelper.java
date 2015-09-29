@@ -27,12 +27,22 @@ public class DBHelper extends SQLiteOpenHelper {
     }
 
     @Override
-    public void onUpgrade(SQLiteDatabase db, int i, int i1) {
-        Log.d("Database", "Updating from version " + i + " to " + i1);
-        for(DBTable table : tables) {
-            table.onUpgrade(db);
-        }
+    public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+        Log.d("Database", "Updating from version " + oldVersion + " to " + newVersion);
+        dropAll(db);
         onCreate(db);
     }
 
+    @Override
+    public void onDowngrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+        Log.d("Database", "Downgrading from version " + oldVersion + " to " + newVersion);
+        dropAll(db);
+        onCreate(db);
+    }
+
+    private void dropAll(SQLiteDatabase db) {
+        for(DBTable table : tables) {
+            table.onUpgrade(db);
+        }
+    }
 }

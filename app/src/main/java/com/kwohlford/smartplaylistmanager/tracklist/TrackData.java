@@ -1,12 +1,9 @@
 package com.kwohlford.smartplaylistmanager.tracklist;
 
-import com.kwohlford.smartplaylistmanager.db.SourceTrackData;
+import android.os.Parcel;
+import android.os.Parcelable;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * Container for storing data for a single track.
@@ -19,11 +16,10 @@ public class TrackData {
     public final String albumName;
     public final String previewUrl;
     public final String albumArtUrl;
-    private float rating;
+    public float rating;
     protected ArrayList<Tag> genreTags;
     protected ArrayList<Tag> moodTags;
     public boolean previewPlaying = false;
-    public final SourceTrackData database;
 
     /**
      * @param uri Spotify URI
@@ -32,7 +28,6 @@ public class TrackData {
      * @param albumName Album name
      * @param previewUrl URL to 30-sec preview clip
      * @param albumArtUrl URL to primary album art
-     * @param database Data source for saving track changes
      */
     public TrackData(
             String uri,
@@ -40,27 +35,16 @@ public class TrackData {
             String artist,
             String albumName,
             String previewUrl,
-            String albumArtUrl,
-            SourceTrackData database) {
+            String albumArtUrl) {
         this.uri = uri;
         this.songTitle = songTitle;
         this.artist = artist;
         this.albumName = albumName;
         this.previewUrl = previewUrl;
         this.albumArtUrl = albumArtUrl;
-        this.database = database;
-        rating = database.getRating(uri);
-        genreTags = database.getTrackTags(uri, Tag.TagType.GENRE);
-        moodTags = database.getTrackTags(uri, Tag.TagType.MOOD);
-    }
-
-    public void setRating(float rating) {
-        this.rating = rating;
-        database.setRating(uri, rating);
-    }
-
-    public float getRating() {
-        return rating;
+        this.rating = 0;
+        this.genreTags = new ArrayList<>();
+        this.moodTags = new ArrayList<>();
     }
 
     /**
@@ -78,26 +62,17 @@ public class TrackData {
         }
     }
 
-    public void setTags(Tag.TagType type, ArrayList<Tag> newTags) {
-        ArrayList<Tag> oldTags;
+    /**
+     * @param type Category of tags to set
+     * @param tags List of tags
+     */
+    public void setTags(Tag.TagType type, ArrayList<Tag> tags) {
         switch(type) {
             case GENRE:
-                oldTags = genreTags;
-                genreTags = newTags;
-                break;
+                genreTags = tags;
             case MOOD:
-                oldTags = moodTags;
-                moodTags = newTags;
-                break;
-            default:
-                oldTags = new ArrayList<>();
+                moodTags = tags;
         }
-        Set<Tag> deleted = new HashSet<>(oldTags);
-        Set<Tag> added = new HashSet<>(newTags);
-        deleted.removeAll(added);
-        added.removeAll(deleted);
-
-        database.setTrackTags(uri, new ArrayList<>(added), new ArrayList<>(deleted));
     }
 
     /**

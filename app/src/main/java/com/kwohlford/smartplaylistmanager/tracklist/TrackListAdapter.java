@@ -11,6 +11,7 @@ import android.widget.RatingBar;
 import android.widget.TextView;
 
 import com.kwohlford.smartplaylistmanager.R;
+import com.kwohlford.smartplaylistmanager.db.SourceTrackData;
 
 /**
  * RecyclerView adapter for saved track list.
@@ -80,11 +81,14 @@ public class TrackListAdapter extends RecyclerView.Adapter<TrackListAdapter.View
         holder.moodTags.setText(track.getTagsAsString(Tag.TagType.MOOD));
 
         // set rating
-        holder.songRating.setRating(track.getRating());
+        holder.songRating.setRating(track.rating);
         holder.songRating.setOnRatingBarChangeListener(new RatingBar.OnRatingBarChangeListener() {
             @Override
             public void onRatingChanged(RatingBar ratingBar, float rating, boolean fromUser) {
-                if (fromUser) track.setRating(rating);
+                if (fromUser) {
+                    track.rating = rating;
+                    SourceTrackData.getInstance().setRating(track.uri, rating);
+                }
             }
         });
 

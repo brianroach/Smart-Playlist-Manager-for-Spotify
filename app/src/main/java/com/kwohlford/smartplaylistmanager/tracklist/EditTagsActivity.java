@@ -11,6 +11,7 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 
 import com.kwohlford.smartplaylistmanager.R;
+import com.kwohlford.smartplaylistmanager.db.SourceTrackData;
 import com.kwohlford.smartplaylistmanager.util.Config;
 
 import java.util.ArrayList;
@@ -32,9 +33,6 @@ public class EditTagsActivity extends Activity {
     public ListView tagList;
     public TagListAdapter tagListAdapter;
 
-    // List of changes to return on activity result
-    private ArrayList<Tag> changedTags;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -52,12 +50,6 @@ public class EditTagsActivity extends Activity {
         tagList = (ListView) findViewById(R.id.tagList);
         tagListAdapter = new TagListAdapter(tags);
         tagList.setAdapter(tagListAdapter);
-
-        // Set up result intent
-        changedTags = new ArrayList<>();
-        Intent intent = new Intent();
-        intent.putParcelableArrayListExtra(KEY_TAGLIST, changedTags);
-        setResult(Config.REQCODE_EDITTAGS, intent);
     }
 
     /**
@@ -159,8 +151,8 @@ public class EditTagsActivity extends Activity {
      * @param name Name of new tag
      */
     private void saveAddedTag(String name) {
-        Tag added = new Tag(name, type, Tag.FLAG_ADDED, "");
-        changedTags.add(added);
+        Tag added = new Tag(name, type);
+        SourceTrackData.getInstance().addTag(added);
         tagListAdapter.addTag(added);
     }
 
@@ -170,41 +162,24 @@ public class EditTagsActivity extends Activity {
      * @param newName New name for tag
      */
     private void saveEditedTag(Tag oldTag, String newName) {
-        Tag edited = new Tag(newName, type, Tag.FLAG_CHANGED, oldTag.name);
-        changedTags.add(edited);
-        tagListAdapter.changeTag(oldTag, edited);
+        SourceTrackData.getInstance().editTag(oldTag, newName);
+        tagListAdapter.changeTag(oldTag, newName);
     }
 
     /**
-     * Flags a tag for deletion and updates the tag list.
+     * Deletes a tag and updates the tag list.
      * @param deleted Tag to delete
      */
     private void saveDeletedTag(Tag deleted) {
         tagListAdapter.deleteTag(deleted);
-        deleted.changeFlag = Tag.FLAG_DELETED;
-        changedTags.add(deleted);
+        SourceTrackData.getInstance().deleteTag(deleted);
     }
 
     /**
-     * Close the activity without saving.
-     * @param view View clicked
-     */
-    public void closeCancel(View view) {
-        changedTags = new ArrayList<>();
-        Intent intent = new Intent();
-        intent.putParcelableArrayListExtra(KEY_TAGLIST, changedTags);
-        setResult(Config.REQCODE_EDITTAGS, intent);
-        finish();
-    }
-
-    /**
-     * Save and quit the activity.
+     * Quit the activity.
      * @param view View clicked
      */
     public void closeSave(View view) {
-        Intent intent = new Intent();
-        intent.putParcelableArrayListExtra(KEY_TAGLIST, changedTags);
-        setResult(Config.REQCODE_EDITTAGS, intent);
         finish();
     }
 }

@@ -18,32 +18,22 @@ import android.view.animation.Animation;
 import android.view.animation.Transformation;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.kwohlford.smartplaylistmanager.R;
 import com.kwohlford.smartplaylistmanager.StartActivity;
 import com.kwohlford.smartplaylistmanager.db.SourceTrackData;
 import com.kwohlford.smartplaylistmanager.util.Config;
-import com.spotify.sdk.android.authentication.AuthenticationClient;
-import com.spotify.sdk.android.authentication.AuthenticationRequest;
-import com.spotify.sdk.android.authentication.AuthenticationResponse;
 import com.spotify.sdk.android.player.ConnectionStateCallback;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-
-import kaaes.spotify.webapi.android.SpotifyApi;
-import kaaes.spotify.webapi.android.SpotifyService;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Screen for displaying list of user's saved tracks.
  */
-public class TrackListActivity extends Activity implements
-        ConnectionStateCallback {
-
-    // Configuration loader
-    private Config config;
+public class TrackListActivity extends Activity {
 
     // Layout & view managers
     private RecyclerView recycler;
@@ -56,17 +46,11 @@ public class TrackListActivity extends Activity implements
             CARD_MIN_DP = 108,
             CARD_MAX_DP = 280;
 
-    // Loading bar
-    public ProgressBar progressBar;
-
     // Vars for tracking playback of preview clips
     private boolean playback;
     private ImageView playbackButton;
     private MediaPlayer player;
     private String playbackTrack;
-
-    // Track list
-    public TrackListing tracks;
 
     // Database source
     public SourceTrackData database;
@@ -75,119 +59,31 @@ public class TrackListActivity extends Activity implements
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_tracklist);
-
-        // Make sure user successfully logged in
-        Bundle extras = getIntent().getExtras();
-        AuthenticationResponse authResponse = (AuthenticationResponse) extras.get(StartActivity.KEY_AUTH);
-        if(authResponse != null) {
-            // Set up views
-            recycler = (RecyclerView) findViewById(R.id.recycler_track_list);
-            recycler.setHasFixedSize(true);
-            recycler.setLayoutManager(new LinearLayoutManager(this));
-
-            // Create media player
-            player = new MediaPlayer();
-            player.setAudioStreamType(AudioManager.STREAM_MUSIC);
-            playback = false;
-
-            // Open database
-            database = new SourceTrackData(this);
-            database.open();
-
-            // Initialize spotify service
-            SpotifyApi api = new SpotifyApi();
-            api.setAccessToken(authResponse.getAccessToken());
-            SpotifyService spotify = api.getService();
-
-            // Start loading track data
-            progressBar = (ProgressBar) findViewById(R.id.progress_bar);
-            progressBar.setVisibility(View.VISIBLE);
-            new DownloadTrackDataTask(this).execute(spotify);
-        }
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
-        super.onActivityResult(requestCode, resultCode, intent);
-
-        if(requestCode == Config.REQCODE_EDITTAGS) { // Result came from edit tags activity
-            Bundle extras = intent.getExtras();
-            ArrayList<Tag> changedTags = extras.getParcelableArrayList(EditTagsActivity.KEY_TAGLIST);
-            if (changedTags != null) {
-                for(Tag t : changedTags) {
-                    if(t.changeFlag == Tag.FLAG_ADDED) {
-                        Log.d("Edit Tags", "Adding tag " + t.name);
-                        database.addTag(t);
-                        tracks.addTag(t);
-                    } else if(t.changeFlag == Tag.FLAG_DELETED) {
-                        Log.d("Edit Tags", "Deleting tag " + t.name);
-                        ArrayList<String> tracksWithTag = database.getTrackUrisWithTag(t);
-                        for(String s : tracksWithTag) {
-                            tracks.getTrackForUri(s).getTags(t.type).remove(t);
-                        }
-                        tracks.deleteTag(t);
-                        database.deleteTag(t);
-                    } else if(t.changeFlag == Tag.FLAG_CHANGED) {
-                        Log.d("Edit Tags", "Renaming tag " + t.prevName + " to " + t.name);
-                        Tag oldTag = new Tag(t.prevName, t.type);
-                        ArrayList<String> tracksWithTag = database.getTrackUrisWithTag(oldTag);
-                        for(String s : tracksWithTag) {
-                            ArrayList<Tag> trackTags = tracks.getTrackForUri(s).getTags(t.type);
-                            trackTags.remove(oldTag);
-                            trackTags.add(t);
-                        }
-                        tracks.addTag(t);
-                        tracks.deleteTag(oldTag);
-                        database.editTag(oldTag, t);
-                    }
-                    t.changeFlag = Tag.FLAG_NONE;
-                }
-                setRecyclerAdapter(new TrackListAdapter(tracks));
-            }
-        }
+        Log.d("TrackList", "Creating activity: track list");
     }
 
     @Override
     protected void onResume() {
-        database.open();
         super.onResume();
+        // Get database instance
+        database = SourceTrackData.getInstance();
+
+        // Set up views
+        recycler = (RecyclerView) findViewById(R.id.recycler_track_list);
+        recycler.setHasFixedSize(true);
+        recycler.setLayoutManager(new LinearLayoutManager(this));
+        setRecyclerAdapter(new TrackListAdapter(database.tracks));
+
+        // Create media player
+        player = new MediaPlayer();
+        player.setAudioStreamType(AudioManager.STREAM_MUSIC);
+        playback = false;
     }
 
     @Override
     protected void onPause() {
-        database.close();
-        super.onPause();
-    }
-
-    @Override
-    public void onLoggedIn() {
-        Log.d("MainActivity", "User logged in");
-    }
-
-    @Override
-    public void onLoggedOut() {
-        Log.d("MainActivity", "User logged out");
-    }
-
-    @Override
-    public void onLoginFailed(Throwable error) {
-        Log.d("MainActivity", "Login failed");
-    }
-
-    @Override
-    public void onTemporaryError() {
-        Log.d("MainActivity", "Temporary error occurred");
-    }
-
-    @Override
-    public void onConnectionMessage(String message) {
-        Log.d("MainActivity", "Received connection message: " + message);
-    }
-
-    @Override
-    protected void onDestroy() {
         player.release();
-        super.onDestroy();
+        super.onPause();
     }
 
     @Override
@@ -198,9 +94,6 @@ public class TrackListActivity extends Activity implements
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
@@ -222,7 +115,7 @@ public class TrackListActivity extends Activity implements
             player.stop();
             player.reset();
             playbackButton.setImageResource(R.drawable.play_circle);
-            tracks.getTrackForUri(playbackTrack).previewPlaying = false;
+            database.tracks.getTrackForUri(playbackTrack).previewPlaying = false;
 
             if (playbackTrack.equals(card.getTag())) {
                 playbackTrack = "";
@@ -236,12 +129,12 @@ public class TrackListActivity extends Activity implements
         try {
             Log.d("Playback", "Loading track " + playbackTrack);
             playbackTrack = (String) card.getTag();
-            player.setDataSource(tracks.getTrackForUri(playbackTrack).previewUrl);
+            player.setDataSource(database.tracks.getTrackForUri(playbackTrack).previewUrl);
             player.prepare();
             player.start();
             playbackButton = (ImageView) view;
             playbackButton.setImageResource(R.drawable.pause_circle);
-            tracks.getTrackForUri(playbackTrack).previewPlaying = true;
+            database.tracks.getTrackForUri(playbackTrack).previewPlaying = true;
             playback = true;
         } catch (Exception e) {
             Log.d("Playback", "Unable to play track " + e.getMessage());
@@ -313,7 +206,7 @@ public class TrackListActivity extends Activity implements
         CardView card = (CardView) view.getParent().getParent().getParent();
         createTagDialog(
                 "Select Genre(s)",
-                tracks.getTrackForUri((String) card.getTag()),
+                database.tracks.getTrackForUri((String) card.getTag()),
                 Tag.TagType.GENRE,
                 (TextView) card.findViewById(R.id.genreTags)
         ).show();
@@ -327,7 +220,7 @@ public class TrackListActivity extends Activity implements
         CardView card = (CardView) view.getParent().getParent().getParent();
         createTagDialog(
                 "Select Mood(s)",
-                tracks.getTrackForUri((String) card.getTag()),
+                database.tracks.getTrackForUri((String) card.getTag()),
                 Tag.TagType.MOOD,
                 (TextView) card.findViewById(R.id.moodTags)
         ).show();
@@ -347,7 +240,7 @@ public class TrackListActivity extends Activity implements
             final Tag.TagType type,
             final TextView txtTags) {
 
-        ArrayList<Tag> allTags = tracks.getTagsByType(type);
+        ArrayList<Tag> allTags = database.tracks.getTags(type);
         ArrayList<Tag> trackTags = track.getTags(type);
 
         final CharSequence[] values = new CharSequence[allTags.size()];
@@ -374,7 +267,7 @@ public class TrackListActivity extends Activity implements
                             Log.d("Setting tag", values[i] + ": " + state[i]);
                             if(state[i]) newTags.add(new Tag((String) values[i], type));
                         }
-                        track.setTags(type, newTags);
+                        setTrackTags(track, type, newTags);
                         dialog.dismiss();
                         txtTags.setText(track.getTagsAsString(type));
                     }
@@ -394,12 +287,43 @@ public class TrackListActivity extends Activity implements
                 .create();
     }
 
+    /**
+     * Start activity for editing available tags.
+     * @param type Type of tags to edit
+     */
     private void openEditTagsScreen(Tag.TagType type) {
         Intent intent = new Intent(this, EditTagsActivity.class);
         intent.putExtra(EditTagsActivity.KEY_TYPE, type.id);
-        intent.putParcelableArrayListExtra(EditTagsActivity.KEY_TAGLIST,
-                type == Tag.TagType.GENRE ? tracks.genreTags : tracks.moodTags);
-        startActivityForResult(intent, Config.REQCODE_EDITTAGS);
+        intent.putParcelableArrayListExtra(EditTagsActivity.KEY_TAGLIST, database.tracks.getTags(type));
+        startActivity(intent);
+    }
+
+    /**
+     * Sets the tags associated with a track and calls the database to store the changes.
+     * @param track Track to edit
+     * @param type Type of tags
+     * @param newTags List of tags to associate with the track
+     */
+    private void setTrackTags(TrackData track, Tag.TagType type, ArrayList<Tag> newTags) {
+        ArrayList<Tag> oldTags;
+        switch(type) {
+            case GENRE:
+                oldTags = track.genreTags;
+                track.genreTags = newTags;
+                break;
+            case MOOD:
+                oldTags = track.moodTags;
+                track.moodTags = newTags;
+                break;
+            default:
+                oldTags = new ArrayList<>();
+        }
+        Set<Tag> deleted = new HashSet<>(oldTags);
+        Set<Tag> added = new HashSet<>(newTags);
+        deleted.removeAll(added);
+        added.removeAll(deleted);
+
+        database.setTrackTags(track.uri, new ArrayList<>(added), new ArrayList<>(deleted));
     }
 
 }

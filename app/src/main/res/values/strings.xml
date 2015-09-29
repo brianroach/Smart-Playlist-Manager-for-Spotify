@@ -6,6 +6,7 @@
     <string name="title_activity_edittags">Edit Tags</string>
     <string name="title_activity_editgenres">Edit Genre Tags</string>
     <string name="title_activity_editmoods">Edit Mood Tags</string>
+    <string name="title_activity_createplaylist">Create Smart Playlist</string>
 
     <string name="action_settings">Settings</string>
 
@@ -17,6 +18,7 @@
     <string name="desc_deletetag">Delete tag</string>
     <string name="desc_next">Next</string>
     <string name="desc_newtag">New tag</string>
+    <string name="desc_newlist">New playlist</string>
 
     <string name="placeholder_songtitle">Song Title</string>
     <string name="placeholder_artist">Artist</string>
@@ -28,13 +30,20 @@
     <string name="button_editmood">EDIT MOOD TAGS</string>
     <string name="button_cancelchanges">CANCEL CHANGES</string>
     <string name="button_savechanges">SAVE CHANGES</string>
+    <string name="button_continue">CONTINUE</string>
 
     <string name="tag_expanded">expanded</string>
     <string name="tag_collapsed">collapsed</string>
 
     <string name="txt_createtag">Create new tag</string>
     <string name="txt_manage">Manage Saved Tracks</string>
-    <string name="desc_newlist">New playlist</string>
     <string name="txt_newplaylist">New Smart Playlist</string>
     <string name="txt_playlists">PLAYLISTS</string>
+    <string name="txt_include">Include</string>
+    <string name="txt_exclude">Exclude</string>
+    <string name="txt_allmatching">all songs matching:</string>
+    <string name="txt_and">and</string>
+    <string name="txt_createfilter">Create new filter</string>
+    <string name="desc_sync">Sync</string>
+    <string name="txt_sync">Sync with Spotify</string>
 </resources>

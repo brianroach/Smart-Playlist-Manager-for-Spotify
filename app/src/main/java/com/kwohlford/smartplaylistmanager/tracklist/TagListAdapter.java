@@ -61,10 +61,10 @@ public class TagListAdapter extends BaseAdapter {
     /**
      * Rename a tag in the dataset.
      * @param oldT Tag to edit
-     * @param newT Tag to replace it with
+     * @param newName New name of the tag
      */
-    public void changeTag(Tag oldT, Tag newT) {
-        dataset.set(dataset.indexOf(oldT), newT);
+    public void changeTag(Tag oldT, String newName) {
+        dataset.get(dataset.indexOf(oldT)).name = newName;
         notifyDataSetChanged();
     }
 

@@ -2,7 +2,9 @@ package com.kwohlford.smartplaylistmanager.db;
 
 import android.database.sqlite.SQLiteDatabase;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -28,9 +30,18 @@ public class TableTrackTags extends DBTable {
     }
 
     @Override
-    public Map<String, DataType> getColumns() {
+    public List<String> getColumns() {
         if(columns != null) return columns;
 
+        ArrayList<String> cols = new ArrayList<>();
+        cols.add(COL_ID);
+        cols.add(COL_TRACKID);
+        cols.add(COL_TAGID);
+        return cols;
+    }
+
+    @Override
+    public Map<String, DataType> getColumnsTypes() {
         HashMap<String, DataType> cols = new HashMap<>();
         cols.put(COL_ID, DataType.INTEGER_PK);
         cols.put(COL_TRACKID, DataType.TEXT);

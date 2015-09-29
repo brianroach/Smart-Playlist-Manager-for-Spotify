@@ -14,16 +14,13 @@ import java.util.Arrays;
 public class DBDataSource {
 
     protected SQLiteDatabase database;
-    protected final DBHelper dbHelper;
+    protected DBHelper dbHelper;
 
-    public DBDataSource(Context context, String dbName, int dbVersion, DBTable... tables) {
+    public void open(Context context, String dbName, int dbVersion, DBTable... tables) throws SQLException {
         dbHelper = new DBHelper(
                 context, dbName, dbVersion,
                 new ArrayList<>(Arrays.asList(tables))
         );
-    }
-
-    public void open() throws SQLException {
         database = dbHelper.getWritableDatabase();
     }
 

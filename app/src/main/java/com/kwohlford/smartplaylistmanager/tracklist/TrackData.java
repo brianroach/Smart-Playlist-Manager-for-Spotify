@@ -89,17 +89,7 @@ public class TrackData {
             s.append("Moods: ");
             tags = moodTags;
         }
-
-        boolean hasTags = false;
-        for(Tag tag : tags) {
-            hasTags = true;
-            s.append(tag).append(", ");
-        }
-        if(hasTags) {
-            s.deleteCharAt(s.lastIndexOf(","));
-        } else {
-            s.append("none");
-        }
+        s.append(Tag.tagListToString(tags));
         return s.toString();
     }
 

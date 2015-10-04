@@ -3,6 +3,8 @@ package com.kwohlford.smartplaylistmanager.tracklist;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.util.ArrayList;
+
 /**
  * Container for storing tags and related information.
  */
@@ -62,6 +64,21 @@ public class Tag implements Parcelable {
     @Override
     public String toString() {
         return name;
+    }
+
+    public static String tagListToString(ArrayList<Tag> tags) {
+        StringBuilder s = new StringBuilder();
+        boolean hasTags = false;
+        for(Tag tag : tags) {
+            hasTags = true;
+            s.append(tag).append(", ");
+        }
+        if(hasTags) {
+            s.deleteCharAt(s.lastIndexOf(","));
+        } else {
+            s.append("none");
+        }
+        return s.toString();
     }
 
     /** Begin parcelable inherited methods **/

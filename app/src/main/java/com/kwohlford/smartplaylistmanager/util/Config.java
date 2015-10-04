@@ -54,14 +54,14 @@ public class Config {
             clientId = parsed[0];
             redirectURI = parsed[1];
         } catch (IOException ioe) {
-            Log.e("Configuration failed", "Unable to read config file");
+            Log.e(TAG, "Unable to read config file");
             ioe.printStackTrace();
         } finally {
             if (stream != null) {
                 try {
                     stream.close();
                 } catch (IOException e) {
-                    Log.d("Configuration failed", "Unable to read config file.");
+                    Log.d(TAG, "Unable to close config file.");
                 }
             }
         }

@@ -8,14 +8,17 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
 import com.kwohlford.smartplaylistmanager.R;
+import com.kwohlford.smartplaylistmanager.playlist.criteria.Criteria;
 
 import java.util.ArrayList;
 
+/**
+ * Screen containing a list of user-defined criteria for generating a playlist.
+ */
 public class CreatePlaylistActivity extends Activity {
 
     // Layout & views
     public ListView criteriaListView;
-//    public CriteriaListAdapter criteriaListAdapter;
     public ArrayList<Criteria> criteriaList;
 
     @Override
@@ -23,30 +26,26 @@ public class CreatePlaylistActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_playlist);
 
-        // Set up criteriaList list
+        // Set up criteria list
         criteriaListView = (ListView) findViewById(R.id.filterList);
         criteriaList = new ArrayList<>();
-//        criteriaListAdapter = new CriteriaListAdapter(new ArrayList<Criteria>());
-//        criteriaListView.setAdapter(criteriaListAdapter);
-
     }
 
     public void createCriteria(View view) {
         FragmentManager fm = getFragmentManager();
         CriteriaCreationFragment dialogFragment = new CriteriaCreationFragment();
-        dialogFragment.show(fm, "Sample Fragment");
+        dialogFragment.show(fm, "Create filter");
     }
 
     public void addCriteria(Criteria criteria) {
+        // placeholder code for creating list
         criteriaList.add(criteria);
         String[] listItems = new String[criteriaList.size()];
         for(int i = 0; i < listItems.length; i++) {
             listItems[i] = criteriaList.get(i).toString();
         }
-
         criteriaListView.setAdapter(new ArrayAdapter<String>(
-                this, android.R.layout.simple_list_item_1, listItems));
-
+                this, android.R.layout.simple_selectable_list_item, listItems));
     }
 
 }

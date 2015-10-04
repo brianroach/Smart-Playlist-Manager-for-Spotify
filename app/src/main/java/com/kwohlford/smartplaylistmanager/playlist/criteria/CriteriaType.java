@@ -1,7 +1,7 @@
-package com.kwohlford.smartplaylistmanager.playlist;
+package com.kwohlford.smartplaylistmanager.playlist.criteria;
 
 /**
- * Created by Kirsten on 26.09.2015.
+ * Type piece of a Criteria object, defines which data to apply the filter to.
  */
 public enum CriteriaType {
 
@@ -26,22 +26,13 @@ public enum CriteriaType {
                         ComparativeClause.LESS_EQ,
                         ComparativeClause.BETWEEN
                 };
-            case GENRE:
-            case MOOD:
+            case GENRE: case MOOD:
+            case ARTIST: case ALBUM:
                 return new ComparativeClause[] {
                         ComparativeClause.EQUALS,
                         ComparativeClause.NOT_EQ,
                         ComparativeClause.IN,
                         ComparativeClause.NOT_IN
-                };
-            case ARTIST:
-            case ALBUM:
-                return new ComparativeClause[] {
-                        ComparativeClause.EQUALS,
-                        ComparativeClause.NOT_EQ,
-                        ComparativeClause.IN,
-                        ComparativeClause.NOT_IN,
-                        ComparativeClause.CONTAINS
                 };
         }
         return new ComparativeClause[] {};

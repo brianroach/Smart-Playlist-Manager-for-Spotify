@@ -407,4 +407,35 @@ public class SourceTrackData extends DBDataSource {
         return id;
     }
 
+    /**
+     * Queries the database to get a list of all entries in a column.
+     * @param tableName Table to query on
+     * @param colName Column to retrieve
+     * @param groupByColumn Column to group by (null for no grouping)
+     * @param sortByColumn Column to sort by (null for no sorting)
+     * @return Contents of column in an array list
+     */
+    public ArrayList<String> getAllFromColumn(
+            String tableName, String colName, String groupByColumn, String sortByColumn) {
+        if(!open) return new ArrayList<>();
+
+        Cursor results = database.query(
+                tableName,
+                new String[] { colName },
+                null, null,
+                groupByColumn,
+                null,
+                sortByColumn == null ? null : sortByColumn + " ASC"
+        );
+        results.moveToFirst();
+
+        ArrayList<String> data = new ArrayList<>();
+        while(!results.isAfterLast()) {
+            data.add(results.getString(0));
+            results.moveToNext();
+        }
+        results.close();
+        return data;
+    }
+
 }

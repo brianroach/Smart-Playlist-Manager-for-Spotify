@@ -13,9 +13,7 @@ public class Criteria {
 
     @Override
     public String toString() {
-        return (include ? "Include" : "Exclude")
-                    + " songs matching: "
-                    + type.display + " "
+        return type.display + " "
                     + comparator.display + " "
                     + inputtedValue.toString();
     };

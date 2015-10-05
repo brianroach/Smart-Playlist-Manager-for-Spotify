@@ -20,6 +20,7 @@ public class CreatePlaylistActivity extends Activity {
     // Layout & views
     public ListView criteriaListView;
     public ArrayList<Criteria> criteriaList;
+    private CriteriaListAdapter adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,6 +30,8 @@ public class CreatePlaylistActivity extends Activity {
         // Set up criteria list
         criteriaListView = (ListView) findViewById(R.id.filterList);
         criteriaList = new ArrayList<>();
+        adapter = new CriteriaListAdapter(criteriaList);
+        criteriaListView.setAdapter(adapter);
     }
 
     public void createCriteria(View view) {
@@ -38,14 +41,25 @@ public class CreatePlaylistActivity extends Activity {
     }
 
     public void addCriteria(Criteria criteria) {
-        // placeholder code for creating list
-        criteriaList.add(criteria);
-        String[] listItems = new String[criteriaList.size()];
-        for(int i = 0; i < listItems.length; i++) {
-            listItems[i] = criteriaList.get(i).toString();
-        }
-        criteriaListView.setAdapter(new ArrayAdapter<String>(
-                this, android.R.layout.simple_selectable_list_item, listItems));
+        adapter.addCriteria(criteria);
     }
 
+    public void closeCancel(View view) {
+        finish();
+    }
+
+    public void closeContinue(View view) {
+        // todo
+        finish();
+    }
+
+    public void editFilter(View view) {
+        FragmentManager fm = getFragmentManager();
+        CriteriaCreationFragment dialogFragment = new CriteriaCreationFragment();
+        // todo
+        dialogFragment.show(fm, "Create filter");
+    }
+
+    public void deleteFilter(View view) {
+    }
 }

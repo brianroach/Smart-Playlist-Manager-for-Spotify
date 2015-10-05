@@ -54,10 +54,12 @@ public class CriteriaCreationFragment extends DialogFragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.playlist_criteria_item, container, false);
+        View rootView = inflater.inflate(R.layout.dialog_criteria_creation, container, false);
         getDialog().setTitle(R.string.txt_createfilter);
 
-        criteria = new Criteria();
+        if(criteria == null) {
+            criteria = new Criteria();
+        }
 
         // Get view references
         context = rootView.getContext();

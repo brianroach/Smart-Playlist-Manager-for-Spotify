@@ -12,6 +12,8 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
 
 import com.kwohlford.smartplaylistmanager.db.SourceTrackData;
 import com.kwohlford.smartplaylistmanager.playlist.CreatePlaylistActivity;
@@ -60,6 +62,12 @@ public class StartActivity extends Activity implements
         builder.setScopes(new String[]{"user-read-private", "user-library-read"});
         AuthenticationRequest request = builder.build();
         AuthenticationClient.openLoginActivity(this, Config.REQCODE_AUTH, request);
+
+        // Set up views
+        ListView playlists = (ListView) findViewById(R.id.playlistList);
+        String[] display = new String[] {"No playlists have been created yet."};
+        playlists.setAdapter(new ArrayAdapter<>(
+                this, android.R.layout.simple_list_item_1, display));
     }
 
     @Override

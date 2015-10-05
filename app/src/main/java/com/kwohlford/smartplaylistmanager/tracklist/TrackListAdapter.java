@@ -1,5 +1,6 @@
 package com.kwohlford.smartplaylistmanager.tracklist;
 
+import android.content.Context;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -19,6 +20,7 @@ import com.kwohlford.smartplaylistmanager.db.SourceTrackData;
 public class TrackListAdapter extends RecyclerView.Adapter<TrackListAdapter.ViewHolder> {
 
     private final TrackListing trackDataset;
+    private final Context context;
 
     /**
      * Contains references to all views on a card.
@@ -50,8 +52,9 @@ public class TrackListAdapter extends RecyclerView.Adapter<TrackListAdapter.View
         }
     }
 
-    public TrackListAdapter(TrackListing trackList) {
+    public TrackListAdapter(TrackListing trackList, Context context) {
         trackDataset = trackList;
+        this.context = context;
     }
 
     @Override
@@ -68,8 +71,9 @@ public class TrackListAdapter extends RecyclerView.Adapter<TrackListAdapter.View
         final TrackData track = trackDataset.get(position);
 
         // set up layout containers
-        holder.ll.getLayoutParams().height = TrackListActivity.LL_MIN_DP;
-        holder.cv.getLayoutParams().height = TrackListActivity.CARD_MIN_DP;
+        float scale = context.getResources().getDisplayMetrics().density;
+        holder.ll.getLayoutParams().height = (int) (TrackListActivity.LL_MIN_DP * scale + 0.5f);
+        holder.cv.getLayoutParams().height = (int) (TrackListActivity.CARD_MIN_DP * scale + 0.5f);
         holder.ll.setTag(R.string.tag_collapsed);
         holder.cv.setTag(track.uri);
 

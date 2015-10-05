@@ -5,4 +5,9 @@
         <!-- Customize your theme here. -->
     </style>
 
+    <style name="smallRatingBar" parent="@android:style/Widget.DeviceDefault.Light.RatingBar">
+        <item name="android:minHeight">50dip</item>
+        <item name="android:maxHeight">50dip</item>
+    </style>
+
 </resources>

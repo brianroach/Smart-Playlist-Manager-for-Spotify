@@ -1,5 +1,6 @@
 package com.kwohlford.smartplaylistmanager.tracklist;
 
+import android.animation.AnimatorSet;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -15,6 +16,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.Animation;
+import android.view.animation.RotateAnimation;
 import android.view.animation.Transformation;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -41,10 +43,10 @@ public class TrackListActivity extends Activity {
 
     // Layout size constants
     public static final int
-            LL_MIN_DP = 120,
-            LL_MAX_DP = 296,
-            CARD_MIN_DP = 108,
-            CARD_MAX_DP = 280;
+            LL_MIN_DP = 80,
+            LL_MAX_DP = 230,
+            CARD_MIN_DP = 70,
+            CARD_MAX_DP = 220;
 
     // Vars for tracking playback of preview clips
     private boolean playback;
@@ -72,7 +74,7 @@ public class TrackListActivity extends Activity {
         recycler = (RecyclerView) findViewById(R.id.recycler_track_list);
         recycler.setHasFixedSize(true);
         recycler.setLayoutManager(new LinearLayoutManager(this));
-        setRecyclerAdapter(new TrackListAdapter(database.tracks));
+        setRecyclerAdapter(new TrackListAdapter(database.tracks, this));
 
         // Create media player
         player = new MediaPlayer();
@@ -148,15 +150,24 @@ public class TrackListActivity extends Activity {
     public void toggleExpandCard(final View view) {
         final LinearLayout ll = (LinearLayout) view;
         final CardView cv = (CardView) ll.findViewById(R.id.cv);
+        final ImageView arrow = (ImageView) ll.findViewById(R.id.imgArrow);
 
-        Animation a;
+        Animation cardAnim;
+        RotateAnimation rotateAnim;
         if(ll.getTag().equals(R.string.tag_collapsed)) {
             // expand card
-            a = new Animation() {
+            cardAnim = new Animation() {
                 @Override
                 protected void applyTransformation(float interpolatedTime, Transformation t) {
-                    ll.getLayoutParams().height = (int) (LL_MIN_DP + ((LL_MAX_DP-LL_MIN_DP) * interpolatedTime));
-                    cv.getLayoutParams().height = (int) (CARD_MIN_DP + ((CARD_MAX_DP-CARD_MIN_DP) * interpolatedTime));
+                    // convert dpi to px
+                    float scale = getBaseContext().getResources().getDisplayMetrics().density;
+                    float llMinPx = LL_MIN_DP * scale + 0.5f;
+                    float llMaxPx = LL_MAX_DP * scale + 0.5f;
+                    float cvMinPx = CARD_MIN_DP * scale + 0.5f;
+                    float cvMaxPx = CARD_MAX_DP * scale + 0.5f;
+
+                    ll.getLayoutParams().height = (int) (llMinPx + ((llMaxPx-llMinPx) * interpolatedTime));
+                    cv.getLayoutParams().height = (int) (cvMinPx + ((cvMaxPx-cvMinPx) * interpolatedTime));
                     ll.requestLayout();
                     cv.requestLayout();
                 }
@@ -166,14 +177,25 @@ public class TrackListActivity extends Activity {
                     return true;
                 }
             };
+            rotateAnim = new RotateAnimation(0.0f, 90,
+                    RotateAnimation.RELATIVE_TO_SELF, 0.5f,
+                    RotateAnimation.RELATIVE_TO_SELF, 0.5f);
+            rotateAnim.setFillAfter(true);
             ll.setTag(R.string.tag_expanded);
         } else {
             // collapse card
-            a = new Animation() {
+            cardAnim = new Animation() {
                 @Override
                 protected void applyTransformation(float interpolatedTime, Transformation t) {
-                    ll.getLayoutParams().height = (int) (LL_MAX_DP + ((LL_MIN_DP-LL_MAX_DP) * interpolatedTime));
-                    cv.getLayoutParams().height = (int) (CARD_MAX_DP + ((CARD_MIN_DP-CARD_MAX_DP) * interpolatedTime));
+                    // convert dpi to px
+                    float scale = getBaseContext().getResources().getDisplayMetrics().density;
+                    float llMinPx = LL_MIN_DP * scale + 0.5f;
+                    float llMaxPx = LL_MAX_DP * scale + 0.5f;
+                    float cvMinPx = CARD_MIN_DP * scale + 0.5f;
+                    float cvMaxPx = CARD_MAX_DP * scale + 0.5f;
+
+                    ll.getLayoutParams().height = (int) (llMaxPx + ((llMinPx-llMaxPx) * interpolatedTime));
+                    cv.getLayoutParams().height = (int) (cvMaxPx + ((cvMinPx-cvMaxPx) * interpolatedTime));
                     ll.requestLayout();
                     cv.requestLayout();
                 }
@@ -183,11 +205,17 @@ public class TrackListActivity extends Activity {
                     return true;
                 }
             };
+            rotateAnim = new RotateAnimation(0.0f, 0,
+                    RotateAnimation.RELATIVE_TO_SELF, 0.5f,
+                    RotateAnimation.RELATIVE_TO_SELF, 0.5f);
+            rotateAnim.setFillAfter(true);
             ll.setTag(R.string.tag_collapsed);
         }
 
-        a.setDuration(500);
-        view.startAnimation(a);
+        rotateAnim.setDuration(500);
+        cardAnim.setDuration(500);
+        arrow.startAnimation(rotateAnim);
+        view.startAnimation(cardAnim);
     }
 
     /**

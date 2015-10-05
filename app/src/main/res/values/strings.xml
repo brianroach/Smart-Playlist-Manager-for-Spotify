@@ -46,4 +46,8 @@
     <string name="txt_createfilter">Create new filter</string>
     <string name="desc_sync">Sync</string>
     <string name="txt_sync">Sync with Spotify</string>
+    <string name="desc_includeexclude">Include or exclude</string>
+    <string name="placeholder_filter">(filter text)</string>
+    <string name="desc_deletefilter">Delete filter</string>
+    <string name="desc_editfilter">Edit filter</string>
 </resources>
